@@ -1,10 +1,8 @@
 import express, { Request, Response } from 'express';
-import { initializeDatabase, getAllUsers, getUserById } from './db.js';
+import { getAllTracks, getTrackById } from './db.js';
 
 const app = express();
 const PORT = process.env.PORT || 4321;
-
-initializeDatabase();
 
 app.use(express.json());
 
@@ -16,27 +14,27 @@ app.get('/health', (req: Request, res: Response) => {
   });
 });
 
-app.get('/users', (req: Request, res: Response) => {
+app.get('/tracks', (req: Request, res: Response) => {
   try {
-    const users = getAllUsers();
-    res.status(200).json(users);
+    const tracks = getAllTracks();
+    res.status(200).json(tracks);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to retrieve users' });
+    res.status(500).json({ error: 'Failed to retrieve tracks' });
   }
 });
 
-app.get('/users/:id', (req: Request, res: Response) => {
+app.get('/tracks/:id', (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
-    const user = getUserById(id);
+    const id = req.params.id;
+    const track = getTrackById(id);
 
-    if (user) {
-      res.status(200).json(user);
+    if (track) {
+      res.status(200).json(track);
     } else {
-      res.status(404).json({ error: 'User not found' });
+      res.status(404).json({ error: 'Track not found' });
     }
   } catch (error) {
-    res.status(500).json({ error: 'Failed to retrieve user' });
+    res.status(500).json({ error: 'Failed to retrieve track' });
   }
 });
 
