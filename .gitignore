@@ -1,3 +1,8 @@
+# Local files
+
+*.local
+*.local.*
+
 # Dependencies
 node_modules/
 
