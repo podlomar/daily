@@ -14,17 +14,7 @@ const initializeSchema = () => {
   console.log('Database schema initialized successfully');
 };
 
-const loadTracks = () => {
-  const tracksPath = path.join(process.cwd(), 'sql', 'tracks.sql');
-  const tracks = fs.readFileSync(tracksPath, 'utf-8');
-
-  db.exec(tracks);
-
-  console.log('Tracks loaded successfully');
-};
-
 export const initializeDatabase = () => {
   initializeSchema();
-  loadTracks();
   return db;
 };

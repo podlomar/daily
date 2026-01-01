@@ -4,27 +4,29 @@ CREATE TABLE IF NOT EXISTS running_tracks (
   name TEXT NOT NULL UNIQUE,
   length REAL NOT NULL,
   url TEXT NOT NULL,
-  progress_unit TEXT CHECK(progress_unit IN ('km', 'flight')) NOT NULL
+  progress_unit TEXT CHECK(progress_unit IN ('km', 'flight', 'pole')) NOT NULL
 );
 
 -- Main daily entries table
 CREATE TABLE IF NOT EXISTS daily_entries (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  date DATE NOT NULL UNIQUE,
+  date DATE PRIMARY KEY,
+  week INTEGER NOT NULL,
+  day STRING CHECK(day IN ('mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun')) NOT NULL,
 
   -- Running data
+  running_schedule TEXT CHECK(running_schedule IN ('regular', 'adhoc', 'legacy')),
   track_id TEXT,
-  running_progress INTEGER,
-  running_performance INTEGER CHECK(running_performance >= 1 AND running_performance <= 5),
+  running_progress TEXT,
+  running_performance INTEGER CHECK(running_performance >= 0 AND running_performance <= 5),
 
   -- Workout data
-  workout_type TEXT CHECK(workout_type IN ('predefined', 'adhoc')),
+  workout_schedule TEXT CHECK(workout_schedule IN ('regular', 'adhoc', 'legacy')),
   workout_routine TEXT,
 
   -- General daily data
   weight REAL,
   last_meal TIME,
-  stretching BOOLEAN,
+  stretching TEXT,
   stairs TEXT,
 
   -- Diary
@@ -38,10 +40,9 @@ CREATE TABLE IF NOT EXISTS daily_entries (
 -- Workout results (individual exercise results)
 CREATE TABLE IF NOT EXISTS workout_results (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  daily_entry_id INTEGER NOT NULL,
+  daily_entry_date DATE NOT NULL,
   exercise_name TEXT NOT NULL,
   reps TEXT,
   holds TEXT,
-  notes TEXT,
-  FOREIGN KEY (daily_entry_id) REFERENCES daily_entries(id) ON DELETE CASCADE
+  FOREIGN KEY (daily_entry_date) REFERENCES daily_entries(date) ON DELETE CASCADE
 );
