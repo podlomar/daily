@@ -30,3 +30,11 @@ export interface DailyEntry {
   stairs: string | null;
   diary: string | null;
 }
+
+export interface WeekSummary {
+  week: number;
+  regularRuns: number;
+  regularWorkouts: number;
+  diaryEntries: number;
+  entries: DailyEntry[];
+}

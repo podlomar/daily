@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import { getAllTracks, getTrackById, getAllDialyEntries, buildDiary, getDailyEntryByDate, updateDailyDiary } from './db.js';
+import { getAllTracks, getTrackById, getAllDialyEntries, buildDiary, getDailyEntryByDate, updateDailyDiary, getWeekSummary } from './db.js';
 
 const app = express();
 const PORT = process.env.PORT || 4321;
@@ -85,6 +85,21 @@ app.get('/diary', (req: Request, res: Response) => {
     res.status(200).send(diary);
   } catch (error) {
     res.status(500).json({ error: 'Failed to retrieve diary' });
+  }
+});
+
+app.get('/week/:weekNumber', (req: Request, res: Response) => {
+  try {
+    const weekNumber = parseInt(req.params.weekNumber, 10);
+    const summary = getWeekSummary(weekNumber);
+
+    if (summary) {
+      res.status(200).json(summary);
+    } else {
+      res.status(404).json({ error: 'Week summary not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to retrieve week summary' });
   }
 });
 

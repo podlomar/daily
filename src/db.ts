@@ -1,5 +1,5 @@
 import { initializeDatabase } from './db-init.js';
-import type { DailyEntry, Track } from './db-model.js';
+import type { DailyEntry, Track, WeekSummary } from './db-model.js';
 import dayjs from 'dayjs';
 
 const db = initializeDatabase();
@@ -102,4 +102,51 @@ export const buildDiary = (): string => {
     result += `${dayjs(r.date).toString()}\n${r.diary}\n\n`;
   }
   return result.trim();
+};
+
+export const getWeekSummary = (week: number): WeekSummary | null => {
+  const stmt = db.prepare(`
+    SELECT
+      de.*,
+      rt.id as track_id,
+      rt.name as track_name,
+      rt.length as track_length,
+      rt.url as track_url,
+      rt.progress_unit as track_progress_unit
+    FROM daily_entries de
+    LEFT JOIN running_tracks rt ON de.track_id = rt.id
+    WHERE de.week = ?
+  `);
+
+  const rows = stmt.all(week);
+  if (rows.length === 0) {
+    return null;
+  }
+
+  let regularRuns = 0;
+  let regularWorkouts = 0;
+  let diaryEntries = 0;
+
+  const entries: DailyEntry[] = [];
+  for (const row of rows) {
+    const entry = rowToDailyEntry(row);
+    entries.push(entry);
+    if (entry.running.schedule === 'regular') {
+      regularRuns += 1;
+    }
+    if (entry.workout.schedule === 'regular') {
+      regularWorkouts += 1;
+    }
+    if (entry.diary) {
+      diaryEntries += 1;
+    }
+  }
+
+  return {
+    week,
+    regularRuns,
+    regularWorkouts,
+    diaryEntries,
+    entries,
+  };
 }
