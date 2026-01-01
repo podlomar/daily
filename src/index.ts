@@ -44,6 +44,7 @@ app.get('/entries', (req: Request, res: Response) => {
     res.status(200).json(entries);
   } catch (error) {
     res.status(500).json({ error: 'Failed to retrieve daily entries' });
+    console.error(error);
   }
 });
 
@@ -88,10 +89,10 @@ app.get('/diary', (req: Request, res: Response) => {
   }
 });
 
-app.get('/week/:weekNumber', (req: Request, res: Response) => {
+app.get('/week/:week', (req: Request, res: Response) => {
   try {
-    const weekNumber = parseInt(req.params.weekNumber, 10);
-    const summary = getWeekSummary(weekNumber);
+    const { week } = req.params;
+    const summary = getWeekSummary(week);
 
     if (summary) {
       res.status(200).json(summary);

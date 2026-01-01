@@ -2,6 +2,7 @@ import { initializeDatabase } from './db-init.js';
 import type { DailyEntry, Track, WeekSummary } from './db-model.js';
 import dayjs from 'dayjs';
 
+
 const db = initializeDatabase();
 
 const rowToTrack = (row: any): Track => ({
@@ -12,7 +13,13 @@ const rowToTrack = (row: any): Track => ({
   progressUnit: row.progress_unit
 });
 
-const rowToDailyEntry = (row: any): DailyEntry => {
+const rowToWorkoutResult = (row: any) => ({
+  exercise: row.exercise,
+  reps: row.reps ?? undefined,
+  holds: row.holds ?? undefined
+});
+
+const rowToDailyEntry = (row: any, workoutResults?: any[]): DailyEntry => {
   const track = row.track_id ? {
     id: row.track_id,
     name: row.track_name,
@@ -21,9 +28,20 @@ const rowToDailyEntry = (row: any): DailyEntry => {
     progressUnit: row.track_progress_unit
   } : null;
 
+  const workout: any = {
+    schedule: row.workout_schedule,
+    routine: row.workout_routine
+  };
+
+  if (workoutResults && workoutResults.length > 0) {
+    workout.results = workoutResults;
+  }
+
   return {
     date: row.date,
     week: row.week,
+    year: row.year,
+    month: row.month,
     day: row.day,
     running: {
       schedule: row.running_schedule,
@@ -31,10 +49,7 @@ const rowToDailyEntry = (row: any): DailyEntry => {
       progress: row.running_progress,
       performance: row.running_performance
     },
-    workout: {
-      schedule: row.workout_schedule,
-      routine: row.workout_routine
-    },
+    workout,
     weight: row.weight,
     lastMeal: row.last_meal,
     stretching: row.stretching,
@@ -67,7 +82,32 @@ export const getAllDialyEntries = (): DailyEntry[] => {
     LEFT JOIN running_tracks rt ON de.track_id = rt.id
     ORDER BY de.date DESC
   `);
-  return stmt.all().map(rowToDailyEntry);
+  const rows = stmt.all();
+
+  // Fetch all workout results in one query
+  const resultsStmt = db.prepare(`
+    SELECT daily_entry_date, exercise, reps, holds
+    FROM workout_results
+    ORDER BY daily_entry_date
+  `);
+  const allResults = resultsStmt.all();
+
+  // Group results by date
+  const resultsByDate = new Map<string, any[]>();
+  for (const result of allResults) {
+    const r = result as any;
+    const date = r.daily_entry_date;
+    if (!resultsByDate.has(date)) {
+      resultsByDate.set(date, []);
+    }
+    resultsByDate.get(date)!.push(rowToWorkoutResult(r));
+  }
+
+  // Create entries with workout results
+  return rows.map((row: any) => {
+    const results = resultsByDate.get(row.date) || [];
+    return rowToDailyEntry(row, results);
+  });
 };
 
 export const getDailyEntryByDate = (date: string): DailyEntry | null => {
@@ -84,7 +124,19 @@ export const getDailyEntryByDate = (date: string): DailyEntry | null => {
     WHERE de.date = ?
   `);
   const row = stmt.get(date);
-  return row ? rowToDailyEntry(row) : null;
+  if (!row) {
+    return null;
+  }
+
+  // Fetch workout results
+  const resultsStmt = db.prepare(`
+    SELECT exercise, reps, holds
+    FROM workout_results
+    WHERE daily_entry_date = ?
+  `);
+  const results = resultsStmt.all(date).map(rowToWorkoutResult);
+
+  return rowToDailyEntry(row, results);
 };
 
 export const updateDailyDiary = (date: string, diary: string | null): boolean => {
@@ -104,7 +156,7 @@ export const buildDiary = (): string => {
   return result.trim();
 };
 
-export const getWeekSummary = (week: number): WeekSummary | null => {
+export const getWeekSummary = (week: string): WeekSummary | null => {
   const stmt = db.prepare(`
     SELECT
       de.*,
@@ -123,13 +175,37 @@ export const getWeekSummary = (week: number): WeekSummary | null => {
     return null;
   }
 
+  // Fetch workout results for this week
+  const resultsStmt = db.prepare(`
+    SELECT wr.daily_entry_date, wr.exercise, wr.reps, wr.holds
+    FROM workout_results wr
+    JOIN daily_entries de ON wr.daily_entry_date = de.date
+    WHERE de.week = ?
+    ORDER BY wr.daily_entry_date
+  `);
+  const allResults = resultsStmt.all(week);
+
+  // Group results by date
+  const resultsByDate = new Map<string, any[]>();
+  for (const result of allResults) {
+    const r = result as any;
+    const date = r.daily_entry_date;
+    if (!resultsByDate.has(date)) {
+      resultsByDate.set(date, []);
+    }
+    resultsByDate.get(date)!.push(rowToWorkoutResult(r));
+  }
+
   let regularRuns = 0;
   let regularWorkouts = 0;
   let diaryEntries = 0;
 
   const entries: DailyEntry[] = [];
   for (const row of rows) {
-    const entry = rowToDailyEntry(row);
+    const r = row as any;
+    const results = resultsByDate.get(r.date) || [];
+    const entry = rowToDailyEntry(r, results);
+
     entries.push(entry);
     if (entry.running.schedule === 'regular') {
       regularRuns += 1;

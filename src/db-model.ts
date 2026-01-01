@@ -13,14 +13,23 @@ export interface Running {
   performance: number | null;
 }
 
+export interface WorkoutResult {
+  exerciseName: string;
+  reps: string | null;
+  holds: string | null;
+}
+
 export interface Workout {
   schedule: 'regular' | 'adhoc' | 'legacy';
   routine: string | null;
+  results: WorkoutResult[];
 }
 
 export interface DailyEntry {
   date: string;
-  week: number;
+  week: string;
+  year: number;
+  month: 'jan' | 'feb' | 'mar' | 'apr' | 'may' | 'jun' | 'jul' | 'aug' | 'sep' | 'oct' | 'nov' | 'dec';
   day: 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
   running: Running;
   workout: Workout;
@@ -31,8 +40,27 @@ export interface DailyEntry {
   diary: string | null;
 }
 
+export interface DailyEntryInit {
+  date?: string;
+  running: {
+    schedule: 'regular' | 'adhoc' | 'legacy';
+    trackId: string | null;
+    progress: string;
+    performance: number | null;
+  },
+  workout: {
+    schedule: 'regular' | 'adhoc' | 'legacy';
+    routine: string | null;
+  };
+  weight: number | null;
+  lastMeal: string | null;
+  stretching: string | null;
+  stairs: string | null;
+  diary: string | null;
+}
+
 export interface WeekSummary {
-  week: number;
+  week: string;
   regularRuns: number;
   regularWorkouts: number;
   diaryEntries: number;

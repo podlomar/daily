@@ -3,6 +3,9 @@ import fs from 'fs';
 import yaml from 'js-yaml';
 import Database from 'better-sqlite3';
 import dayjs from 'dayjs';
+import isoWeek from 'dayjs/plugin/isoWeek.js'
+
+dayjs.extend(isoWeek);
 
 const dbPath = path.join(process.cwd(), 'db.local.sqlite');
 const db = new Database(dbPath);
@@ -18,7 +21,7 @@ const slugify = (text) => {
 
 const importData = (fileName, startDate) => {
   let currentDate = dayjs(startDate);
-  const week = Number(fileName.split('-')[1].substring(0, 2));
+  const week = `${currentDate.isoWeekYear()}-${String(currentDate.isoWeek()).padStart(2, '0')}`;
   const yamlPath = path.join(process.cwd(), fileName);
   const fileContents = fs.readFileSync(yamlPath, 'utf8');
   const data = yaml.load(fileContents);
@@ -27,15 +30,15 @@ const importData = (fileName, startDate) => {
 
   const insertEntry = db.prepare(`
     INSERT OR REPLACE INTO daily_entries (
-      date, week, day, running_schedule, track_id,
+      date, week, year, month, day, running_schedule, track_id,
       running_progress, running_performance,
       workout_schedule, workout_routine,
       weight, last_meal, stretching, stairs, diary
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   const insertWorkoutResult = db.prepare(`
-    INSERT INTO workout_results (daily_entry_date, exercise_name, reps, holds)
+    INSERT INTO workout_results (daily_entry_date, exercise, reps, holds)
     VALUES (?, ?, ?, ?)
   `);
 
@@ -141,6 +144,8 @@ const importData = (fileName, startDate) => {
       insertEntry.run(
         entry.date,
         week,
+        currentDate.year(),
+        currentDate.format('MMM').toLowerCase(),
         currentDate.format('ddd').toLowerCase(),
         runningSchedule,
         trackId,
