@@ -181,7 +181,7 @@ const importData = (fileName, startDate) => {
 };
 
 // List files in the data directory
-const dataDir = path.join(process.cwd(), 'data');
+const dataDir = path.join(process.cwd(), 'data.local');
 const files = fs.readdirSync(dataDir).filter(file => file.endsWith('.yml'));
 
 let currentDate = '2025-07-17';

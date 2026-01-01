@@ -14,14 +14,14 @@ CREATE TABLE IF NOT EXISTS daily_entries (
   day STRING CHECK(day IN ('mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun')) NOT NULL,
 
   -- Running data
-  running_schedule TEXT CHECK(running_schedule IN ('regular', 'adhoc', 'legacy')),
+  running_schedule TEXT NOT NULL CHECK(running_schedule IN ('regular', 'adhoc', 'legacy')),
   track_id TEXT,
-  running_progress TEXT,
+  running_progress TEXT NOT NULL,
   running_performance INTEGER CHECK(running_performance >= 0 AND running_performance <= 5),
 
   -- Workout data
   workout_schedule TEXT CHECK(workout_schedule IN ('regular', 'adhoc', 'legacy')),
-  workout_routine TEXT,
+  workout_routine TEXT NOT NULL,
 
   -- General daily data
   weight REAL,
