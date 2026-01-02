@@ -1,0 +1,11 @@
+POST http://localhost:4321/entries
+Content-Type: application/json
+
+{
+  "running": {
+    "schedule": "regular",
+    "trackId": "mesto",
+    "progress": "5",
+    "performance": 2
+  }
+}

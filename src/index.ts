@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import { getAllTracks, getTrackById, getAllDialyEntries, buildDiary, getDailyEntryByDate, updateDailyDiary, getWeekSummary } from './db.js';
+import { getAllTracks, getTrackById, getAllDialyEntries, buildDiary, getDailyEntryByDate, updateDailyDiary, getWeekSummary, createDailyEntry } from './db.js';
 
 const app = express();
 const PORT = process.env.PORT || 4321;
@@ -46,6 +46,18 @@ app.get('/entries', (req: Request, res: Response) => {
     res.status(500).json({ error: 'Failed to retrieve daily entries' });
     console.error(error);
   }
+});
+
+app.post('/entries', (req: Request, res: Response) => {
+  try {
+    const entryInit = req.body;
+    createDailyEntry(entryInit);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to create daily entry' });
+    console.error(error);
+    return;
+  }
+  res.status(201).json({ message: 'Daily entry created successfully' });
 });
 
 app.get('/entries/:date', (req: Request, res: Response) => {

@@ -6,21 +6,23 @@ export interface Track {
   progressUnit: string;
 }
 
+export type Schedule = 'regular' | 'adhoc' | 'legacy';
+
 export interface Running {
-  schedule: 'regular' | 'adhoc' | 'legacy';
+  schedule: Schedule;
   track: Track | null;
   progress: string;
   performance: number | null;
 }
 
 export interface WorkoutResult {
-  exerciseName: string;
+  exercise: string;
   reps: string | null;
   holds: string | null;
 }
 
 export interface Workout {
-  schedule: 'regular' | 'adhoc' | 'legacy';
+  schedule: Schedule;
   routine: string | null;
   results: WorkoutResult[];
 }
@@ -42,21 +44,18 @@ export interface DailyEntry {
 
 export interface DailyEntryInit {
   date?: string;
-  running: {
-    schedule: 'regular' | 'adhoc' | 'legacy';
+  running?: {
+    schedule: Schedule;
     trackId: string | null;
     progress: string;
     performance: number | null;
-  },
-  workout: {
-    schedule: 'regular' | 'adhoc' | 'legacy';
-    routine: string | null;
   };
-  weight: number | null;
-  lastMeal: string | null;
-  stretching: string | null;
-  stairs: string | null;
-  diary: string | null;
+  workout?: Workout;
+  weight?: number;
+  lastMeal?: string;
+  stretching?: string;
+  stairs?: string;
+  diary?: string;
 }
 
 export interface WeekSummary {

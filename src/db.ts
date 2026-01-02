@@ -1,7 +1,10 @@
+import { create } from 'node:domain';
 import { initializeDatabase } from './db-init.js';
-import type { DailyEntry, Track, WeekSummary } from './db-model.js';
+import type { DailyEntry, DailyEntryInit, Running, Track, WeekSummary, WorkoutResult } from './db-model.js';
 import dayjs from 'dayjs';
+import isoWeek from 'dayjs/plugin/isoWeek.js';
 
+dayjs.extend(isoWeek);
 
 const db = initializeDatabase();
 
@@ -111,6 +114,12 @@ export const getAllDialyEntries = (): DailyEntry[] => {
 };
 
 export const getDailyEntryByDate = (date: string): DailyEntry | null => {
+  let queryDate = date;
+
+  if (date === 'today') {
+    queryDate = dayjs().format('YYYY-MM-DD');
+  }
+
   const stmt = db.prepare(`
     SELECT
       de.*,
@@ -123,7 +132,7 @@ export const getDailyEntryByDate = (date: string): DailyEntry | null => {
     LEFT JOIN running_tracks rt ON de.track_id = rt.id
     WHERE de.date = ?
   `);
-  const row = stmt.get(date);
+  const row = stmt.get(queryDate);
   if (!row) {
     return null;
   }
@@ -137,6 +146,71 @@ export const getDailyEntryByDate = (date: string): DailyEntry | null => {
   const results = resultsStmt.all(date).map(rowToWorkoutResult);
 
   return rowToDailyEntry(row, results);
+};
+
+export const createWorkoutResults = (date: string, results: WorkoutResult[]): void => {
+  const stmt = db.prepare(`
+    INSERT INTO workout_results (daily_entry_date, exercise, reps, holds)
+    VALUES (?, ?, ?, ?)
+  `);
+
+  const insertMany = db.transaction((results: WorkoutResult[]) => {
+    for (const result of results) {
+      stmt.run(date, result.exercise, result.reps ?? null, result.holds ?? null);
+    }
+  });
+
+  insertMany(results);
+};
+
+export const createDailyEntry = (entryInit: DailyEntryInit): void => {
+  const stmt = db.prepare(`
+    INSERT INTO daily_entries
+    (date, week, year, month, day, track_id, running_schedule, running_progress, running_performance,
+     workout_schedule, workout_routine, weight, last_meal, stretching, stairs, diary)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+
+  const date = entryInit.date ?? dayjs().format('YYYY-MM-DD');
+  const week = `${dayjs(date).isoWeekYear()}-${String(dayjs(date).isoWeek()).padStart(2, '0')}`;
+  const month = dayjs(date).format('MMM').toLowerCase();
+  const day = dayjs(date).format('ddd').toLowerCase();
+  const running = entryInit.running ?? {
+    schedule: 'adhoc',
+    trackId: null,
+    progress: null,
+    performance: null
+  };
+
+  if (running.trackId !== null) {
+    const track = getTrackById(running.trackId);
+    if (!track) {
+      throw new Error(`Track with id ${running.trackId} does not exist`);
+    }
+  }
+
+  stmt.run(
+    date,
+    week,
+    dayjs(date).year(),
+    month,
+    day,
+    running.trackId,
+    running.schedule,
+    running.progress,
+    running.performance,
+    entryInit.workout?.schedule ?? 'adhoc',
+    entryInit.workout?.routine ?? 'rest',
+    entryInit.weight ?? null,
+    entryInit.lastMeal ?? null,
+    entryInit.stretching ?? null,
+    entryInit.stairs ?? null,
+    entryInit.diary ?? null
+  );
+
+  if (entryInit.workout !== undefined && entryInit.workout.results.length > 0) {
+    createWorkoutResults(date, entryInit.workout.results);
+  }
 };
 
 export const updateDailyDiary = (date: string, diary: string | null): boolean => {
