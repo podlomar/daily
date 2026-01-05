@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import { getAllTracks, getTrackById, getAllDialyEntries, buildDiary, getDailyEntryByDate, updateDailyDiary, getWeekSummary, createDailyEntry } from './db.js';
+import { getAllTracks, getTrackById, getAllDialyEntries, buildDiary, getDailyEntryByDate, updateDailyDiary, getWeekSummary, createDailyEntry, createTrack } from './db.js';
 
 const app = express();
 const PORT = process.env.PORT || 4321;
@@ -35,6 +35,17 @@ app.get('/tracks/:id', (req: Request, res: Response) => {
     }
   } catch (error) {
     res.status(500).json({ error: 'Failed to retrieve track' });
+  }
+});
+
+app.post('/tracks', (req: Request, res: Response) => {
+  try {
+    const track = req.body;
+    createTrack(track);
+    res.status(201).json({ message: 'Track created successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to create track' });
+    console.error(error);
   }
 });
 

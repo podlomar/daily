@@ -72,6 +72,14 @@ export const getTrackById = (id: string): Track | null => {
   return row ? rowToTrack(row) : null;
 };
 
+export const createTrack = (track: Track): void => {
+  const stmt = db.prepare(`
+    INSERT INTO running_tracks (id, name, length, url, progress_unit)
+    VALUES (?, ?, ?, ?, ?)
+  `);
+  stmt.run(track.id, track.name, track.length, track.url, track.progressUnit);
+};
+
 export const getAllDialyEntries = (): DailyEntry[] => {
   const stmt = db.prepare(`
     SELECT
