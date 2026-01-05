@@ -1,6 +1,6 @@
 import { create } from 'node:domain';
 import { initializeDatabase } from './db-init.js';
-import type { DailyEntry, DailyEntryInit, Running, Track, WeekSummary, WorkoutResult } from './db-model.js';
+import type { DailyEntry, DailyEntryInit, DailyEntryUpdate, Running, Track, WeekSummary, WorkoutResult } from './db-model.js';
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek.js';
 
@@ -221,9 +221,45 @@ export const createDailyEntry = (entryInit: DailyEntryInit): void => {
   }
 };
 
-export const updateDailyDiary = (date: string, diary: string | null): boolean => {
-  const stmt = db.prepare('UPDATE daily_entries SET diary = ? WHERE date = ?');
-  const info = stmt.run(diary, date);
+export const updateDailyEntry = (date: string, entryUpdate: DailyEntryUpdate): boolean => {
+  const updates: string[] = [];
+  const values: any[] = [];
+
+  if (entryUpdate.weight !== undefined) {
+    updates.push('weight = ?');
+    values.push(entryUpdate.weight);
+  }
+  if (entryUpdate.lastMeal !== undefined) {
+    updates.push('last_meal = ?');
+    values.push(entryUpdate.lastMeal);
+  }
+  if (entryUpdate.stretching !== undefined) {
+    updates.push('stretching = ?');
+    values.push(entryUpdate.stretching);
+  }
+  if (entryUpdate.stairs !== undefined) {
+    updates.push('stairs = ?');
+    values.push(entryUpdate.stairs);
+  }
+  if (entryUpdate.diary !== undefined) {
+    updates.push('diary = ?');
+    values.push(entryUpdate.diary);
+  }
+
+  if (updates.length === 0) {
+    return false;
+  }
+
+  const queryDate = date === 'today' ? dayjs().format('YYYY-MM-DD') : date;
+
+  values.push(queryDate);
+
+  const stmt = db.prepare(`
+    UPDATE daily_entries
+    SET ${updates.join(', ')}
+    WHERE date = ?
+  `);
+  const info = stmt.run(...values);
   return info.changes > 0;
 };
 

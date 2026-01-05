@@ -39,6 +39,15 @@ Content-Type: application/json
 //  "lastMeal": null,
 }
 
+###
+
+PATCH http://localhost:4321/entries/today
+Content-Type: application/json
+
+{
+  "lastMeal": "18:40"
+}
+
 ### 
 
 POST http://localhost:4321/tracks

@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import { getAllTracks, getTrackById, getAllDialyEntries, buildDiary, getDailyEntryByDate, updateDailyDiary, getWeekSummary, createDailyEntry, createTrack } from './db.js';
+import { getAllTracks, getTrackById, getAllDialyEntries, buildDiary, getDailyEntryByDate, updateDailyEntry, getWeekSummary, createDailyEntry, createTrack } from './db.js';
 
 const app = express();
 const PORT = process.env.PORT || 4321;
@@ -86,19 +86,19 @@ app.get('/entries/:date', (req: Request, res: Response) => {
   }
 });
 
-app.post('/entries/:date', (req: Request, res: Response) => {
+app.patch('/entries/:date', (req: Request, res: Response) => {
   try {
     const date = req.params.date;
-    const { diary } = req.body;
+    const entryUpdate = req.body;
 
-    const success = updateDailyDiary(date, diary);
+    const success = updateDailyEntry(date, entryUpdate);
     if (success) {
-      res.status(200).json({ message: 'Diary updated successfully' });
+      res.status(200).json({ message: 'Daily entry updated successfully' });
     } else {
       res.status(404).json({ error: 'Entry not found' });
     }
   } catch (error) {
-    res.status(500).json({ error: 'Failed to update daily diary' });
+    res.status(500).json({ error: 'Failed to update daily entry' });
   }
 });
 

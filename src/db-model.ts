@@ -58,6 +58,14 @@ export interface DailyEntryInit {
   diary?: string;
 }
 
+export interface DailyEntryUpdate {
+  weight?: number | null;
+  lastMeal?: string | null;
+  stretching?: string | null;
+  stairs?: string | null;
+  diary?: string | null;
+}
+
 export interface WeekSummary {
   week: string;
   regularRuns: number;
