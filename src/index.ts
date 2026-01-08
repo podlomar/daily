@@ -4,6 +4,10 @@ import { getAllTracks, getTrackById, getAllDialyEntries, buildDiary, getDailyEnt
 const app = express();
 const PORT = process.env.PORT || 4321;
 
+const payload = (result: any) => ({
+  result,
+});
+
 app.use(express.json());
 
 app.get('/health', (req: Request, res: Response) => {
@@ -17,7 +21,7 @@ app.get('/health', (req: Request, res: Response) => {
 app.get('/tracks', (req: Request, res: Response) => {
   try {
     const tracks = getAllTracks();
-    res.status(200).json(tracks);
+    res.status(200).json(payload(tracks));
   } catch (error) {
     res.status(500).json({ error: 'Failed to retrieve tracks' });
   }
@@ -29,7 +33,7 @@ app.get('/tracks/:id', (req: Request, res: Response) => {
     const track = getTrackById(id);
 
     if (track) {
-      res.status(200).json(track);
+      res.status(200).json(payload(track));
     } else {
       res.status(404).json({ error: 'Track not found' });
     }
@@ -52,7 +56,7 @@ app.post('/tracks', (req: Request, res: Response) => {
 app.get('/entries', (req: Request, res: Response) => {
   try {
     const entries = getAllDialyEntries();
-    res.status(200).json(entries);
+    res.status(200).json(payload(entries));
   } catch (error) {
     res.status(500).json({ error: 'Failed to retrieve daily entries' });
     console.error(error);
@@ -77,7 +81,7 @@ app.get('/entries/:date', (req: Request, res: Response) => {
     const entry = getDailyEntryByDate(date);
 
     if (entry) {
-      res.status(200).json(entry);
+      res.status(200).json(payload(entry));
     } else {
       res.status(404).json({ error: 'Entry not found' });
     }
@@ -106,7 +110,7 @@ app.get('/workouts/:date', (req: Request, res: Response) => {
   try {
     const date = req.params.date;
     const results = getWorkoutResultsByDate(date);
-    res.status(200).json(results);
+    res.status(200).json(payload(results));
   } catch (error) {
     res.status(500).json({ error: 'Failed to retrieve workout results' });
   }
@@ -128,7 +132,7 @@ app.get('/week/:week', (req: Request, res: Response) => {
     const summary = getWeekSummary(week);
 
     if (summary) {
-      res.status(200).json(summary);
+      res.status(200).json(payload(summary));
     } else {
       res.status(404).json({ error: 'Week summary not found' });
     }
