@@ -151,9 +151,19 @@ export const getDailyEntryByDate = (date: string): DailyEntry | null => {
     FROM workout_results
     WHERE daily_entry_date = ?
   `);
-  const results = resultsStmt.all(date).map(rowToWorkoutResult);
+  const results = resultsStmt.all(queryDate).map(rowToWorkoutResult);
 
   return rowToDailyEntry(row, results);
+};
+
+export const getWorkoutResultsByDate = (date: string): WorkoutResult[] => {
+  const queryDate = date === 'today' ? dayjs().format('YYYY-MM-DD') : date;
+  const stmt = db.prepare(`
+    SELECT exercise, reps, holds
+    FROM workout_results
+    WHERE daily_entry_date = ?
+  `);
+  return stmt.all(queryDate).map(rowToWorkoutResult);
 };
 
 export const createWorkoutResults = (date: string, results: WorkoutResult[]): void => {

@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import { getAllTracks, getTrackById, getAllDialyEntries, buildDiary, getDailyEntryByDate, updateDailyEntry, getWeekSummary, createDailyEntry, createTrack } from './db.js';
+import { getAllTracks, getTrackById, getAllDialyEntries, buildDiary, getDailyEntryByDate, updateDailyEntry, getWeekSummary, createDailyEntry, createTrack, getWorkoutResultsByDate } from './db.js';
 
 const app = express();
 const PORT = process.env.PORT || 4321;
@@ -99,6 +99,16 @@ app.patch('/entries/:date', (req: Request, res: Response) => {
     }
   } catch (error) {
     res.status(500).json({ error: 'Failed to update daily entry' });
+  }
+});
+
+app.get('/workouts/:date', (req: Request, res: Response) => {
+  try {
+    const date = req.params.date;
+    const results = getWorkoutResultsByDate(date);
+    res.status(200).json(results);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to retrieve workout results' });
   }
 });
 
