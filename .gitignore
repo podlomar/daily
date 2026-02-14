@@ -3,6 +3,9 @@
 *.local
 *.local.*
 
+# AI agents
+.claude
+
 # Dependencies
 node_modules/
 
