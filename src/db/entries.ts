@@ -1,28 +1,20 @@
-import { create } from 'node:domain';
-import { initializeDatabase } from './db-init.js';
-import type { DailyEntry, DailyEntryInit, DailyEntryUpdate, Running, Track, WeekSummary, WorkoutResult } from './db-model.js';
+import { db } from './connection.js';
+import { getTrackById } from './tracks.js';
+import { createWorkoutResults, validateWorkout } from './workouts.js';
+import type { DailyEntry, DailyEntryInput, DailyEntryUpdate, RunningInput, Workout, WorkoutResult } from '../db-model.js';
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek.js';
+import { Result } from 'monadix/result';
 
 dayjs.extend(isoWeek);
 
-const db = initializeDatabase();
-
-const rowToTrack = (row: any): Track => ({
-  id: row.id,
-  name: row.name,
-  length: row.length,
-  url: row.url,
-  progressUnit: row.progress_unit
-});
-
-const rowToWorkoutResult = (row: any) => ({
+const rowToWorkoutResult = (row: any): WorkoutResult => ({
   exercise: row.exercise,
-  reps: row.reps ?? undefined,
-  holds: row.holds ?? undefined
+  execution: row.execution,
+  volume: row.volume,
 });
 
-const rowToDailyEntry = (row: any, workoutResults?: any[]): DailyEntry => {
+const rowToDailyEntry = (row: any, workoutResults?: WorkoutResult[]): DailyEntry => {
   const track = row.track_id ? {
     id: row.track_id,
     name: row.track_name,
@@ -61,26 +53,7 @@ const rowToDailyEntry = (row: any, workoutResults?: any[]): DailyEntry => {
   };
 };
 
-export const getAllTracks = (): Track[] => {
-  const stmt = db.prepare('SELECT * FROM running_tracks');
-  return stmt.all().map(rowToTrack);
-};
-
-export const getTrackById = (id: string): Track | null => {
-  const stmt = db.prepare('SELECT * FROM running_tracks WHERE id = ?');
-  const row = stmt.get(id);
-  return row ? rowToTrack(row) : null;
-};
-
-export const createTrack = (track: Track): void => {
-  const stmt = db.prepare(`
-    INSERT INTO running_tracks (id, name, length, url, progress_unit)
-    VALUES (?, ?, ?, ?, ?)
-  `);
-  stmt.run(track.id, track.name, track.length, track.url, track.progressUnit);
-};
-
-export const getAllDialyEntries = (): DailyEntry[] => {
+export const getAllDailyEntries = (): DailyEntry[] => {
   const stmt = db.prepare(`
     SELECT
       de.*,
@@ -95,16 +68,14 @@ export const getAllDialyEntries = (): DailyEntry[] => {
   `);
   const rows = stmt.all();
 
-  // Fetch all workout results in one query
   const resultsStmt = db.prepare(`
-    SELECT daily_entry_date, exercise, reps, holds
+    SELECT daily_entry_date, exercise, execution, volume
     FROM workout_results
     ORDER BY daily_entry_date
   `);
   const allResults = resultsStmt.all();
 
-  // Group results by date
-  const resultsByDate = new Map<string, any[]>();
+  const resultsByDate = new Map<string, WorkoutResult[]>();
   for (const result of allResults) {
     const r = result as any;
     const date = r.daily_entry_date;
@@ -114,7 +85,6 @@ export const getAllDialyEntries = (): DailyEntry[] => {
     resultsByDate.get(date)!.push(rowToWorkoutResult(r));
   }
 
-  // Create entries with workout results
   return rows.map((row: any) => {
     const results = resultsByDate.get(row.date) || [];
     return rowToDailyEntry(row, results);
@@ -122,11 +92,7 @@ export const getAllDialyEntries = (): DailyEntry[] => {
 };
 
 export const getDailyEntryByDate = (date: string): DailyEntry | null => {
-  let queryDate = date;
-
-  if (date === 'today') {
-    queryDate = dayjs().format('YYYY-MM-DD');
-  }
+  const queryDate = date === 'today' ? dayjs().format('YYYY-MM-DD') : date;
 
   const stmt = db.prepare(`
     SELECT
@@ -145,9 +111,8 @@ export const getDailyEntryByDate = (date: string): DailyEntry | null => {
     return null;
   }
 
-  // Fetch workout results
   const resultsStmt = db.prepare(`
-    SELECT exercise, reps, holds
+    SELECT exercise, execution, volume
     FROM workout_results
     WHERE daily_entry_date = ?
   `);
@@ -156,32 +121,7 @@ export const getDailyEntryByDate = (date: string): DailyEntry | null => {
   return rowToDailyEntry(row, results);
 };
 
-export const getWorkoutResultsByDate = (date: string): WorkoutResult[] => {
-  const queryDate = date === 'today' ? dayjs().format('YYYY-MM-DD') : date;
-  const stmt = db.prepare(`
-    SELECT exercise, reps, holds
-    FROM workout_results
-    WHERE daily_entry_date = ?
-  `);
-  return stmt.all(queryDate).map(rowToWorkoutResult);
-};
-
-export const createWorkoutResults = (date: string, results: WorkoutResult[]): void => {
-  const stmt = db.prepare(`
-    INSERT INTO workout_results (daily_entry_date, exercise, reps, holds)
-    VALUES (?, ?, ?, ?)
-  `);
-
-  const insertMany = db.transaction((results: WorkoutResult[]) => {
-    for (const result of results) {
-      stmt.run(date, result.exercise, result.reps ?? null, result.holds ?? null);
-    }
-  });
-
-  insertMany(results);
-};
-
-export const createDailyEntry = (entryInit: DailyEntryInit): void => {
+export const createDailyEntry = (input: DailyEntryInput): Result<string[], string[]> => {
   const stmt = db.prepare(`
     INSERT INTO daily_entries
     (date, week, year, month, day, track_id, running_schedule, running_progress, running_performance,
@@ -189,46 +129,63 @@ export const createDailyEntry = (entryInit: DailyEntryInit): void => {
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
-  const date = entryInit.date ?? dayjs().format('YYYY-MM-DD');
+  const date = input.date ?? dayjs().format('YYYY-MM-DD');
   const week = `${dayjs(date).isoWeekYear()}-${String(dayjs(date).isoWeek()).padStart(2, '0')}`;
   const month = dayjs(date).format('MMM').toLowerCase();
   const day = dayjs(date).format('ddd').toLowerCase();
-  const running = entryInit.running ?? {
-    schedule: 'adhoc',
-    trackId: null,
-    progress: null,
-    performance: null
-  };
+  const running: RunningInput = input.running ?? { schedule: 'void' };
 
-  if (running.trackId !== null) {
+  if (running.trackId !== undefined) {
     const track = getTrackById(running.trackId);
     if (!track) {
-      throw new Error(`Track with id ${running.trackId} does not exist`);
+      return Result.fail([`Running track with ID ${running.trackId} does not exist`]);
     }
   }
 
-  stmt.run(
-    date,
-    week,
-    dayjs(date).year(),
-    month,
-    day,
-    running.trackId,
-    running.schedule,
-    running.progress,
-    running.performance,
-    entryInit.workout?.schedule ?? 'adhoc',
-    entryInit.workout?.routine ?? 'rest',
-    entryInit.weight ?? null,
-    entryInit.lastMeal ?? null,
-    entryInit.stretching ?? null,
-    entryInit.stairs ?? null,
-    entryInit.diary ?? null
-  );
-
-  if (entryInit.workout !== undefined && entryInit.workout.results.length > 0) {
-    createWorkoutResults(date, entryInit.workout.results);
+  const workout: Workout = input.workout ?? { schedule: 'void' };
+  const workoutValidation = validateWorkout(workout);
+  if (workoutValidation.isFail()) {
+    return Result.fail(workoutValidation.err());
   }
+
+  const report: string[] = [];
+
+  try {
+    stmt.run(
+      date,
+      week,
+      dayjs(date).year(),
+      month,
+      day,
+      running.trackId,
+      running.schedule,
+      running.progress,
+      running.performance,
+      input.workout?.schedule ?? 'adhoc',
+      input.workout?.routine ?? 'rest',
+      input.weight ?? null,
+      input.lastMeal ?? null,
+      input.stretching ?? null,
+      input.stairs ?? null,
+      input.diary ?? null
+    );
+
+    if (
+      input.workout !== undefined
+      && input.workout.routine !== 'rest'
+      && input.workout.results !== undefined
+      && input.workout.results.length > 0
+    ) {
+      const count = createWorkoutResults(date, input.workout.results);
+      report.push(`Recorded ${count} workout results`);
+    } else {
+      report.push('No workout results to record');
+    }
+  } catch (error) {
+    return Result.fail([`Failed to create daily entry: ${(error as Error).message}`]);
+  }
+
+  return Result.success(report);
 };
 
 export const updateDailyEntry = (date: string, entryUpdate: DailyEntryUpdate): boolean => {
@@ -256,12 +213,13 @@ export const updateDailyEntry = (date: string, entryUpdate: DailyEntryUpdate): b
     values.push(entryUpdate.diary);
   }
 
+  console.log(`Updating daily entry for ${date} with:`, entryUpdate);
+
   if (updates.length === 0) {
     return false;
   }
 
   const queryDate = date === 'today' ? dayjs().format('YYYY-MM-DD') : date;
-
   values.push(queryDate);
 
   const stmt = db.prepare(`
@@ -270,6 +228,7 @@ export const updateDailyEntry = (date: string, entryUpdate: DailyEntryUpdate): b
     WHERE date = ?
   `);
   const info = stmt.run(...values);
+  console.log(`Updated daily entry for ${queryDate}:`, entryUpdate, 'Changes:', info.changes);
   return info.changes > 0;
 };
 
@@ -284,7 +243,7 @@ export const buildDiary = (): string => {
   return result.trim();
 };
 
-export const getWeekSummary = (week: string): WeekSummary | null => {
+export const getWeekSummary = (week: string): DailyEntry[] | null => {
   const stmt = db.prepare(`
     SELECT
       de.*,
@@ -303,9 +262,8 @@ export const getWeekSummary = (week: string): WeekSummary | null => {
     return null;
   }
 
-  // Fetch workout results for this week
   const resultsStmt = db.prepare(`
-    SELECT wr.daily_entry_date, wr.exercise, wr.reps, wr.holds
+    SELECT wr.daily_entry_date, wr.exercise, wr.execution, wr.volume
     FROM workout_results wr
     JOIN daily_entries de ON wr.daily_entry_date = de.date
     WHERE de.week = ?
@@ -313,8 +271,7 @@ export const getWeekSummary = (week: string): WeekSummary | null => {
   `);
   const allResults = resultsStmt.all(week);
 
-  // Group results by date
-  const resultsByDate = new Map<string, any[]>();
+  const resultsByDate = new Map<string, WorkoutResult[]>();
   for (const result of allResults) {
     const r = result as any;
     const date = r.daily_entry_date;
@@ -324,33 +281,8 @@ export const getWeekSummary = (week: string): WeekSummary | null => {
     resultsByDate.get(date)!.push(rowToWorkoutResult(r));
   }
 
-  let regularRuns = 0;
-  let regularWorkouts = 0;
-  let diaryEntries = 0;
-
-  const entries: DailyEntry[] = [];
-  for (const row of rows) {
-    const r = row as any;
-    const results = resultsByDate.get(r.date) || [];
-    const entry = rowToDailyEntry(r, results);
-
-    entries.push(entry);
-    if (entry.running.schedule === 'regular') {
-      regularRuns += 1;
-    }
-    if (entry.workout.schedule === 'regular') {
-      regularWorkouts += 1;
-    }
-    if (entry.diary) {
-      diaryEntries += 1;
-    }
-  }
-
-  return {
-    week,
-    regularRuns,
-    regularWorkouts,
-    diaryEntries,
-    entries,
-  };
-}
+  return rows.map((row: any) => {
+    const results = resultsByDate.get(row.date) || [];
+    return rowToDailyEntry(row, results);
+  });
+};
