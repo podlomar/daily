@@ -5,6 +5,7 @@ import { DailyEntryInput } from './db-model.js';
 import { getAllTracks, getTrackById, getAllDailyEntries, buildDiary, getDailyEntryByDate, updateDailyEntry, getWeekSummary, createDailyEntry, createTrack, getWorkoutResultsByDate, collectStats, workoutsSummary, getExercises } from './db/index.js';
 import { parseDailyEntryYaml, parseDailyEntryJson } from './parsers/index.js';
 import { Result } from 'monadix/result';
+import { openapiSpec } from './openapi.js';
 
 const app = express();
 const PORT = process.env.PORT || 4321;
@@ -40,6 +41,10 @@ app.use((req: Request, res: Response, next) => {
   } else {
     next();
   }
+});
+
+app.get('/api', (req: Request, res: Response) => {
+  res.status(200).json(openapiSpec);
 });
 
 app.get('/health', (req: Request, res: Response) => {

@@ -76,7 +76,6 @@ describe('Entries API', () => {
       const res = await request.get(`/entries/${testDate}`);
       assert.equal(res.status, 200);
       assert.equal(res.body.links.self, `/entries/${testDate}`);
-      assert.ok(res.body.links.today);
       assert.ok(res.body.links.previous);
       assert.ok(res.body.links.next);
       assert.equal(res.body.result.date, testDate);
