@@ -39,7 +39,8 @@ describe('Entries API', () => {
         .set('Content-Type', 'application/json')
         .send(sampleEntry);
       assert.equal(res.status, 201);
-      assert.equal(res.body.message, 'Daily entry created successfully');
+      assert.equal(res.body.links.self, '/entries');
+      assert.equal(res.body.result.message, 'Daily entry created successfully');
     });
 
     it('rejects invalid input with 400', async () => {
@@ -48,6 +49,7 @@ describe('Entries API', () => {
         .set('Content-Type', 'application/json')
         .send({ date: 'not-a-date' });
       assert.equal(res.status, 400);
+      assert.ok(res.body.error);
     });
 
     it('rejects unknown track ID with 400', async () => {
@@ -64,18 +66,23 @@ describe('Entries API', () => {
           },
         });
       assert.equal(res.status, 400);
+      assert.ok(res.body.error);
+      assert.ok(Array.isArray(res.body.details));
     });
   });
 
   describe('GET /entries/:date', () => {
-    it('returns the created entry', async () => {
+    it('returns the created entry with navigation links', async () => {
       const res = await request.get(`/entries/${testDate}`);
       assert.equal(res.status, 200);
+      assert.equal(res.body.links.self, `/entries/${testDate}`);
+      assert.ok(res.body.links.today);
+      assert.ok(res.body.links.previous);
+      assert.ok(res.body.links.next);
       assert.equal(res.body.result.date, testDate);
       assert.equal(res.body.result.weight, 75.5);
       assert.equal(res.body.result.lastMeal, '19:00');
       assert.equal(res.body.result.running.track.id, 'entry-test-track');
-      assert.ok(res.body.links);
     });
 
     it('returns 404 for unknown date', async () => {
@@ -90,6 +97,7 @@ describe('Entries API', () => {
         .patch(`/entries/${testDate}`)
         .send({ weight: 76.0, stretching: 'yes' });
       assert.equal(res.status, 200);
+      assert.equal(res.body.links.self, `/entries/${testDate}`);
 
       const check = await request.get(`/entries/${testDate}`);
       assert.equal(check.body.result.weight, 76.0);
@@ -108,6 +116,7 @@ describe('Entries API', () => {
     it('returns all entries', async () => {
       const res = await request.get('/entries');
       assert.equal(res.status, 200);
+      assert.equal(res.body.links.self, '/entries');
       assert.ok(Array.isArray(res.body.result));
       assert.ok(res.body.result.length >= 1);
     });

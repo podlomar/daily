@@ -15,7 +15,8 @@ describe('Tracks API', () => {
     it('creates a track and returns 201', async () => {
       const res = await request.post('/tracks').send(sampleTrack);
       assert.equal(res.status, 201);
-      assert.equal(res.body.message, 'Track created successfully');
+      assert.equal(res.body.links.self, '/tracks');
+      assert.equal(res.body.result.message, 'Track created successfully');
     });
   });
 
@@ -23,6 +24,7 @@ describe('Tracks API', () => {
     it('returns all tracks', async () => {
       const res = await request.get('/tracks');
       assert.equal(res.status, 200);
+      assert.equal(res.body.links.self, '/tracks');
       assert.ok(Array.isArray(res.body.result));
       assert.ok(res.body.result.length >= 1);
 
@@ -37,6 +39,7 @@ describe('Tracks API', () => {
     it('returns a specific track', async () => {
       const res = await request.get('/tracks/test-track');
       assert.equal(res.status, 200);
+      assert.equal(res.body.links.self, '/tracks/test-track');
       assert.equal(res.body.result.id, 'test-track');
       assert.equal(res.body.result.progressUnit, 'km');
     });
