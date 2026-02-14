@@ -16,14 +16,14 @@ CREATE TABLE IF NOT EXISTS daily_entries (
   day STRING CHECK(day IN ('mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun')) NOT NULL,
 
   -- Running data
-  running_schedule TEXT NOT NULL CHECK(running_schedule IN ('regular', 'adhoc', 'legacy')),
+  running_schedule TEXT NOT NULL CHECK(running_schedule IN ('regular', 'adhoc', 'legacy', 'void')),
   track_id TEXT,
-  running_progress TEXT NOT NULL,
+  running_progress TEXT,
   running_performance INTEGER CHECK(running_performance >= 0 AND running_performance <= 5),
 
   -- Workout data
-  workout_schedule TEXT CHECK(workout_schedule IN ('regular', 'adhoc', 'legacy')),
-  workout_routine TEXT NOT NULL,
+  workout_schedule TEXT CHECK(workout_schedule IN ('regular', 'adhoc', 'legacy', 'void')),
+  workout_routine TEXT,
 
   -- General daily data
   weight REAL,
@@ -44,7 +44,12 @@ CREATE TABLE IF NOT EXISTS workout_results (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   daily_entry_date DATE NOT NULL,
   exercise TEXT NOT NULL,
-  reps TEXT,
-  holds TEXT,
+  execution TEXT NOT NULL,
+  volume TEXT NOT NULL,
   FOREIGN KEY (daily_entry_date) REFERENCES daily_entries(date) ON DELETE CASCADE
+);
+
+-- List of available exercises (reference data)
+CREATE TABLE IF NOT EXISTS exercises (
+  name TEXT PRIMARY KEY
 );
