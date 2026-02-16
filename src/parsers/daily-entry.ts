@@ -1,5 +1,6 @@
 import { Result } from 'monadix/result';
-import { ZDailyEntryInput, ZDailyYamlInput, type DailyEntryInput, type RunningInput, type WorkoutInput } from '../db-model.js';
+import { ZDailyEntryInput, ZDailyYamlInput, type DailyEntryInput, type RunningInput } from '../db/entries.js';
+import type { WorkoutInput } from '../db/workouts.js';
 
 export const parseDailyEntryYaml = (input: unknown): Result<DailyEntryInput, string[]> => {
   console.log('Parsing daily entry input from YAML data:', input);

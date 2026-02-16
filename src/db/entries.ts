@@ -1,10 +1,88 @@
+import * as z from 'zod';
 import { db } from './connection.js';
-import { getTrackById } from './tracks.js';
-import { createWorkoutResults, validateWorkout } from './workouts.js';
-import type { DailyEntry, DailyEntryInput, DailyEntryUpdate, RunningInput, WorkoutInput, WorkoutResult } from '../db-model.js';
+import { getTrackById, ZRunning } from './tracks.js';
+import { createWorkoutResults, validateWorkout, ZWorkout, type WorkoutInput, type WorkoutResult } from './workouts.js';
+import { ZSchedule } from './schema.js';
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek.js';
 import { Result } from 'monadix/result';
+
+export const ZDailyEntry = z.object({
+  date: z.string().meta({ format: 'date' }),
+  week: z.string().meta({ description: 'ISO week as YYYY-WW' }),
+  year: z.int(),
+  month: z.enum(['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']),
+  day: z.enum(['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']),
+  running: ZRunning,
+  workout: ZWorkout,
+  weight: z.number().nullable().optional(),
+  lastMeal: z.string().nullable().optional(),
+  stretching: z.string().nullable().optional(),
+  stairs: z.string().nullable().optional(),
+  diary: z.string().nullable().optional(),
+}).meta({ id: 'DailyEntry' });
+
+export type DailyEntry = z.infer<typeof ZDailyEntry>;
+
+export const ZDailyEntryUpdate = z.object({
+  weight: z.number().nullable().optional(),
+  lastMeal: z.string().nullable().optional(),
+  stretching: z.string().nullable().optional(),
+  stairs: z.string().nullable().optional(),
+  diary: z.string().nullable().optional(),
+}).meta({ id: 'DailyEntryUpdate' });
+
+export type DailyEntryUpdate = z.infer<typeof ZDailyEntryUpdate>;
+
+const ZRunningInput = z.strictObject({
+  schedule: ZSchedule,
+  trackId: z.string().optional(),
+  progress: z.string().optional(),
+  performance: z.number().min(0).max(4).optional(),
+}).meta({ id: 'RunningInput' });
+
+export type RunningInput = z.infer<typeof ZRunningInput>;
+
+export const ZDailyEntryInput = z.strictObject({
+  date: z.iso.date().optional().meta({ description: 'Defaults to today if omitted' }),
+  running: ZRunningInput.optional(),
+  workout: z.object({
+    schedule: ZSchedule,
+    routine: z.string().optional(),
+    results: z.array(z.string()).optional().meta({
+      description: 'Format: "exercise/execution volume", e.g. "squats/set3x 22+22+22"',
+    }),
+  }).optional(),
+  weight: z.number().nullable().optional(),
+  lastMeal: z.string().nullable().optional(),
+  stretching: z.string().nullable().optional(),
+  stairs: z.string().nullable().optional(),
+  diary: z.string().nullable().optional(),
+}).meta({ id: 'DailyEntryInput' });
+
+export type DailyEntryInput = z.infer<typeof ZDailyEntryInput>;
+
+export const ZDailyYamlInput = z.strictObject({
+  date: z.string().optional(),
+  run: z.string().optional(),
+  workout: z.string().optional(),
+  results: z.array(z.string()).optional(),
+  weight: z.number().nullable().optional(),
+  lastMeal: z.string().nullable().optional(),
+  stretching: z.string().nullable().optional(),
+  stairs: z.string().nullable().optional(),
+  diary: z.string().nullable().optional(),
+}).meta({ id: 'DailyYamlInput' });
+
+export type DailyYamlInput = z.infer<typeof ZDailyYamlInput>;
+
+export interface WeekSummary {
+  week: string;
+  regularRuns: number;
+  regularWorkouts: number;
+  diaryEntries: number;
+  entries: DailyEntry[];
+}
 
 dayjs.extend(isoWeek);
 

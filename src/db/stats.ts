@@ -1,15 +1,13 @@
+import * as z from 'zod';
 import { db } from './connection.js';
 
-interface RunStats {
-  count: number;
-  distance: number;
-}
+export const ZStats = z.object({
+  bestRunningStreak: z.object({ count: z.int(), distance: z.number() }),
+  currentRunningStreak: z.object({ count: z.int(), distance: z.number() }),
+  total: z.object({ count: z.int(), distance: z.number() }),
+}).meta({ id: 'Stats' });
 
-export interface Stats {
-  bestRunningStreak: RunStats;
-  currentRunningStreak: RunStats;
-  total: RunStats;
-}
+export type Stats = z.infer<typeof ZStats>;
 
 export const collectStats = (): Stats => {
   const stmt = db.prepare(`
@@ -19,9 +17,9 @@ export const collectStats = (): Stats => {
     ORDER BY de.date ASC
   `);
 
-  let currentStreak: RunStats = { count: 0, distance: 0 };
-  let bestStreak: RunStats = { count: 0, distance: 0 };
-  let total: RunStats = { count: 0, distance: 0 };
+  let currentStreak = { count: 0, distance: 0 };
+  let bestStreak = { count: 0, distance: 0 };
+  let total = { count: 0, distance: 0 };
 
   for (const row of stmt.iterate()) {
     const r = row as any;

@@ -1,6 +1,29 @@
+import * as z from 'zod';
 import { db } from './connection.js';
-import type { WorkoutInput, WorkoutResult } from '../db-model.js';
+import { ZSchedule, type Schedule } from './schema.js';
 import { Result } from 'monadix/result';
+
+export const ZWorkoutResult = z.object({
+  exercise: z.string(),
+  execution: z.string(),
+  volume: z.string(),
+}).meta({ id: 'WorkoutResult' });
+
+export type WorkoutResult = z.infer<typeof ZWorkoutResult>;
+
+export const ZWorkout = z.object({
+  schedule: ZSchedule,
+  routine: z.string().optional(),
+  results: z.array(ZWorkoutResult).optional(),
+}).meta({ id: 'Workout' });
+
+export type Workout = z.infer<typeof ZWorkout>;
+
+export interface WorkoutInput {
+  schedule: Schedule;
+  routine?: string;
+  results?: string[];
+}
 
 export interface Exercise {
   name: string;

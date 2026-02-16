@@ -1,5 +1,25 @@
+import * as z from 'zod';
 import { db } from './connection.js';
-import type { Track } from '../db-model.js';
+import { ZSchedule } from './schema.js';
+
+export const ZTrack = z.object({
+  id: z.string(),
+  name: z.string(),
+  length: z.number().meta({ description: 'Track distance' }),
+  url: z.url(),
+  progressUnit: z.enum(['km', 'flight', 'pole']),
+}).meta({ id: 'Track' });
+
+export type Track = z.infer<typeof ZTrack>;
+
+export const ZRunning = z.object({
+  schedule: ZSchedule,
+  track: ZTrack.nullable(),
+  progress: z.string().nullable(),
+  performance: z.int().min(0).max(5).nullable(),
+}).meta({ id: 'Running' });
+
+export type Running = z.infer<typeof ZRunning>;
 
 const rowToTrack = (row: any): Track => ({
   id: row.id,

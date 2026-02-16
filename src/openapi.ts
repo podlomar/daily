@@ -1,10 +1,10 @@
 import * as z from 'zod';
 import { createDocument } from 'zod-openapi';
-import {
-  ZTrack, ZRunning, ZWorkoutResult, ZWorkout,
-  ZDailyEntry, ZDailyEntryInput, ZDailyEntryUpdate,
-  ZStats, ZLinks, ZErrorResponse,
-} from './db-model.js';
+import { ZLinks, ZErrorResponse } from './db/schema.js';
+import { ZTrack, ZRunning } from './db/tracks.js';
+import { ZWorkoutResult, ZWorkout } from './db/workouts.js';
+import { ZDailyEntry, ZDailyEntryInput, ZDailyEntryUpdate } from './db/entries.js';
+import { ZStats } from './db/stats.js';
 
 const envelopeOf = (resultSchema: z.ZodType) => z.object({
   links: ZLinks,

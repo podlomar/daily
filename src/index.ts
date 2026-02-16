@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import dayjs from 'dayjs';
 import yaml from 'js-yaml';
-import { DailyEntryInput } from './db-model.js';
+import type { DailyEntryInput } from './db/entries.js';
 import { getAllTracks, getTrackById, getAllDailyEntries, buildDiary, getDailyEntryByDate, updateDailyEntry, getWeekSummary, createDailyEntry, createTrack, getWorkoutResultsByDate, collectStats, workoutsSummary, getExercises } from './db/index.js';
 import { parseDailyEntryYaml, parseDailyEntryJson } from './parsers/index.js';
 import { Result } from 'monadix/result';
