@@ -1,5 +1,5 @@
 import { Result } from 'monadix/result';
-import { ZDailyEntryInput, ZDailyYamlInput, type DailyEntryInput, type RunningInput, type Workout } from '../db-model.js';
+import { ZDailyEntryInput, ZDailyYamlInput, type DailyEntryInput, type RunningInput, type WorkoutInput } from '../db-model.js';
 
 export const parseDailyEntryYaml = (input: unknown): Result<DailyEntryInput, string[]> => {
   console.log('Parsing daily entry input from YAML data:', input);
@@ -24,12 +24,12 @@ export const parseDailyEntryYaml = (input: unknown): Result<DailyEntryInput, str
     }
   }
 
-  let workout: Workout | null = null;
+  let workout: WorkoutInput | null = null;
   if (data.workout !== undefined) {
     const workoutParts = data.workout.split(' ');
     if (workoutParts.length === 2) {
       workout = {
-        schedule: workoutParts[0] as Workout['schedule'],
+        schedule: workoutParts[0] as WorkoutInput['schedule'],
         routine: workoutParts[1],
         results: data.results,
       };

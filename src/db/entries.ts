@@ -1,7 +1,7 @@
 import { db } from './connection.js';
 import { getTrackById } from './tracks.js';
 import { createWorkoutResults, validateWorkout } from './workouts.js';
-import type { DailyEntry, DailyEntryInput, DailyEntryUpdate, RunningInput, Workout, WorkoutResult } from '../db-model.js';
+import type { DailyEntry, DailyEntryInput, DailyEntryUpdate, RunningInput, WorkoutInput, WorkoutResult } from '../db-model.js';
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek.js';
 import { Result } from 'monadix/result';
@@ -142,7 +142,7 @@ export const createDailyEntry = (input: DailyEntryInput): Result<string[], strin
     }
   }
 
-  const workout: Workout = input.workout ?? { schedule: 'void' };
+  const workout: WorkoutInput = input.workout ?? { schedule: 'void' };
   const workoutValidation = validateWorkout(workout);
   if (workoutValidation.isFail()) {
     return Result.fail(workoutValidation.err());

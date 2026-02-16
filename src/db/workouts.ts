@@ -1,5 +1,5 @@
 import { db } from './connection.js';
-import type { Workout, WorkoutResult } from '../db-model.js';
+import type { WorkoutInput, WorkoutResult } from '../db-model.js';
 import { Result } from 'monadix/result';
 
 export interface Exercise {
@@ -39,7 +39,7 @@ export const getExercises = (): Exercise[] => {
   return rows;
 };
 
-export const validateWorkout = (workout: Workout): Result<void, string[]> => {
+export const validateWorkout = (workout: WorkoutInput): Result<void, string[]> => {
   const errors: string[] = [];
   const exercises = getExercises();
   const results = workout.results ?? [];

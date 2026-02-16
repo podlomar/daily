@@ -1,172 +1,34 @@
-const Schedule = {
-  type: 'string',
-  enum: ['regular', 'adhoc', 'legacy', 'void'],
-};
+import * as z from 'zod';
+import { createDocument } from 'zod-openapi';
+import {
+  ZTrack, ZRunning, ZWorkoutResult, ZWorkout,
+  ZDailyEntry, ZDailyEntryInput, ZDailyEntryUpdate,
+  ZStats, ZLinks, ZErrorResponse,
+} from './db-model.js';
 
-const Track = {
-  type: 'object',
-  properties: {
-    id: { type: 'string' },
-    name: { type: 'string' },
-    length: { type: 'number', description: 'Track distance' },
-    url: { type: 'string', format: 'uri' },
-    progressUnit: { type: 'string', enum: ['km', 'flight', 'pole'] },
-  },
-  required: ['id', 'name', 'length', 'url', 'progressUnit'],
-};
-
-const Running = {
-  type: 'object',
-  properties: {
-    schedule: Schedule,
-    track: { oneOf: [{ $ref: '#/components/schemas/Track' }, { type: 'null' }] },
-    progress: { type: ['string', 'null'] },
-    performance: { type: ['integer', 'null'], minimum: 0, maximum: 5 },
-  },
-  required: ['schedule', 'track', 'progress', 'performance'],
-};
-
-const WorkoutResult = {
-  type: 'object',
-  properties: {
-    exercise: { type: 'string' },
-    execution: { type: 'string' },
-    volume: { type: 'string' },
-  },
-  required: ['exercise', 'execution', 'volume'],
-};
-
-const Workout = {
-  type: 'object',
-  properties: {
-    schedule: Schedule,
-    routine: { type: 'string' },
-    results: { type: 'array', items: { $ref: '#/components/schemas/WorkoutResult' } },
-  },
-  required: ['schedule'],
-};
-
-const DailyEntry = {
-  type: 'object',
-  properties: {
-    date: { type: 'string', format: 'date' },
-    week: { type: 'string', description: 'ISO week as YYYY-WW' },
-    year: { type: 'integer' },
-    month: { type: 'string', enum: ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'] },
-    day: { type: 'string', enum: ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] },
-    running: { $ref: '#/components/schemas/Running' },
-    workout: { $ref: '#/components/schemas/Workout' },
-    weight: { type: ['number', 'null'] },
-    lastMeal: { type: ['string', 'null'] },
-    stretching: { type: ['string', 'null'] },
-    stairs: { type: ['string', 'null'] },
-    diary: { type: ['string', 'null'] },
-  },
-  required: ['date', 'week', 'year', 'month', 'day', 'running', 'workout'],
-};
-
-const DailyEntryInput = {
-  type: 'object',
-  properties: {
-    date: { type: 'string', format: 'date', description: 'Defaults to today if omitted' },
-    running: {
-      type: 'object',
-      properties: {
-        schedule: Schedule,
-        trackId: { type: 'string' },
-        progress: { type: 'string' },
-        performance: { type: 'integer', minimum: 0, maximum: 4 },
-      },
-      required: ['schedule'],
-    },
-    workout: {
-      type: 'object',
-      properties: {
-        schedule: Schedule,
-        routine: { type: 'string' },
-        results: { type: 'array', items: { type: 'string' }, description: 'Format: "exercise/execution volume", e.g. "squats/set3x 22+22+22"' },
-      },
-      required: ['schedule'],
-    },
-    weight: { type: ['number', 'null'] },
-    lastMeal: { type: ['string', 'null'] },
-    stretching: { type: ['string', 'null'] },
-    stairs: { type: ['string', 'null'] },
-    diary: { type: ['string', 'null'] },
-  },
-};
-
-const DailyEntryUpdate = {
-  type: 'object',
-  properties: {
-    weight: { type: ['number', 'null'] },
-    lastMeal: { type: ['string', 'null'] },
-    stretching: { type: ['string', 'null'] },
-    stairs: { type: ['string', 'null'] },
-    diary: { type: ['string', 'null'] },
-  },
-};
-
-const Stats = {
-  type: 'object',
-  properties: {
-    bestRunningStreak: {
-      type: 'object',
-      properties: { count: { type: 'integer' }, distance: { type: 'number' } },
-    },
-    currentRunningStreak: {
-      type: 'object',
-      properties: { count: { type: 'integer' }, distance: { type: 'number' } },
-    },
-    total: {
-      type: 'object',
-      properties: { count: { type: 'integer' }, distance: { type: 'number' } },
-    },
-  },
-};
-
-const Links = {
-  type: 'object',
-  properties: {
-    self: { type: 'string' },
-  },
-  required: ['self'],
-  additionalProperties: { type: 'string' },
-};
-
-const ErrorResponse = {
-  type: 'object',
-  properties: {
-    error: { type: 'string' },
-    details: { type: 'array', items: { type: 'string' } },
-  },
-  required: ['error'],
-};
-
-const envelopeOf = (resultSchema: object) => ({
-  type: 'object',
-  properties: {
-    links: { $ref: '#/components/schemas/Links' },
-    result: resultSchema,
-  },
-  required: ['links', 'result'],
+const envelopeOf = (resultSchema: z.ZodType) => z.object({
+  links: ZLinks,
+  result: resultSchema,
 });
 
-const jsonEnvelope = (resultSchema: object) => ({
+const jsonEnvelope = (resultSchema: z.ZodType) => ({
   content: { 'application/json': { schema: envelopeOf(resultSchema) } },
 });
 
-const errorRef = { $ref: '#/components/schemas/ErrorResponse' };
+const errorResponse = (description: string) => ({
+  description,
+  content: { 'application/json': { schema: ZErrorResponse } },
+});
 
 const dateParam = {
   name: 'date',
-  in: 'path',
+  in: 'path' as const,
   required: true,
-  schema: { type: 'string' },
+  schema: { type: 'string' as const },
   description: 'Date in YYYY-MM-DD format, or "today"',
 };
 
-export const openapiSpec = {
+export const openapiSpec = createDocument({
   openapi: '3.1.0',
   info: {
     title: 'Daily Fitness Tracker API',
@@ -181,14 +43,11 @@ export const openapiSpec = {
         responses: {
           '200': {
             description: 'Service status',
-            ...jsonEnvelope({
-              type: 'object',
-              properties: {
-                status: { type: 'string', const: 'ok' },
-                timestamp: { type: 'string', format: 'date-time' },
-                uptime: { type: 'number' },
-              },
-            }),
+            ...jsonEnvelope(z.object({
+              status: z.literal('ok'),
+              timestamp: z.string().meta({ format: 'date-time' }),
+              uptime: z.number(),
+            })),
           },
         },
       },
@@ -200,7 +59,7 @@ export const openapiSpec = {
         responses: {
           '200': {
             description: 'Running stats',
-            ...jsonEnvelope({ $ref: '#/components/schemas/Stats' }),
+            ...jsonEnvelope(ZStats),
           },
         },
       },
@@ -212,10 +71,7 @@ export const openapiSpec = {
         responses: {
           '200': {
             description: 'Map of exercise names to their volume history',
-            ...jsonEnvelope({
-              type: 'object',
-              additionalProperties: { type: 'array', items: { type: 'number' } },
-            }),
+            ...jsonEnvelope(z.record(z.string(), z.array(z.number()))),
           },
         },
       },
@@ -227,7 +83,7 @@ export const openapiSpec = {
         responses: {
           '200': {
             description: 'List of tracks',
-            ...jsonEnvelope({ type: 'array', items: { $ref: '#/components/schemas/Track' } }),
+            ...jsonEnvelope(z.array(ZTrack)),
           },
         },
       },
@@ -236,14 +92,14 @@ export const openapiSpec = {
         operationId: 'createTrack',
         requestBody: {
           required: true,
-          content: { 'application/json': { schema: { $ref: '#/components/schemas/Track' } } },
+          content: { 'application/json': { schema: ZTrack } },
         },
         responses: {
           '201': {
             description: 'Track created',
-            ...jsonEnvelope({ type: 'object', properties: { message: { type: 'string' } } }),
+            ...jsonEnvelope(z.object({ message: z.string() })),
           },
-          '500': { description: 'Server error', content: { 'application/json': { schema: errorRef } } },
+          '500': errorResponse('Server error'),
         },
       },
     },
@@ -255,9 +111,9 @@ export const openapiSpec = {
         responses: {
           '200': {
             description: 'Track details',
-            ...jsonEnvelope({ $ref: '#/components/schemas/Track' }),
+            ...jsonEnvelope(ZTrack),
           },
-          '404': { description: 'Track not found', content: { 'application/json': { schema: errorRef } } },
+          '404': errorResponse('Track not found'),
         },
       },
     },
@@ -268,7 +124,7 @@ export const openapiSpec = {
         responses: {
           '200': {
             description: 'List of daily entries',
-            ...jsonEnvelope({ type: 'array', items: { $ref: '#/components/schemas/DailyEntry' } }),
+            ...jsonEnvelope(z.array(ZDailyEntry)),
           },
         },
       },
@@ -278,7 +134,7 @@ export const openapiSpec = {
         requestBody: {
           required: true,
           content: {
-            'application/json': { schema: { $ref: '#/components/schemas/DailyEntryInput' } },
+            'application/json': { schema: ZDailyEntryInput },
             'application/yaml': {
               schema: {
                 type: 'object',
@@ -290,15 +146,12 @@ export const openapiSpec = {
         responses: {
           '201': {
             description: 'Entry created',
-            ...jsonEnvelope({
-              type: 'object',
-              properties: {
-                message: { type: 'string' },
-                report: { type: 'array', items: { type: 'string' } },
-              },
-            }),
+            ...jsonEnvelope(z.object({
+              message: z.string(),
+              report: z.array(z.string()),
+            })),
           },
-          '400': { description: 'Validation error', content: { 'application/json': { schema: errorRef } } },
+          '400': errorResponse('Validation error'),
         },
       },
     },
@@ -310,9 +163,9 @@ export const openapiSpec = {
         responses: {
           '200': {
             description: 'Daily entry with navigation links (previous, next)',
-            ...jsonEnvelope({ $ref: '#/components/schemas/DailyEntry' }),
+            ...jsonEnvelope(ZDailyEntry),
           },
-          '404': { description: 'Entry not found', content: { 'application/json': { schema: errorRef } } },
+          '404': errorResponse('Entry not found'),
         },
       },
       patch: {
@@ -321,14 +174,14 @@ export const openapiSpec = {
         parameters: [dateParam],
         requestBody: {
           required: true,
-          content: { 'application/json': { schema: { $ref: '#/components/schemas/DailyEntryUpdate' } } },
+          content: { 'application/json': { schema: ZDailyEntryUpdate } },
         },
         responses: {
           '200': {
             description: 'Entry updated',
-            ...jsonEnvelope({ type: 'object', properties: { message: { type: 'string' } } }),
+            ...jsonEnvelope(z.object({ message: z.string() })),
           },
-          '404': { description: 'Entry not found', content: { 'application/json': { schema: errorRef } } },
+          '404': errorResponse('Entry not found'),
         },
       },
     },
@@ -339,14 +192,14 @@ export const openapiSpec = {
         parameters: [dateParam],
         requestBody: {
           required: true,
-          content: { 'application/json': { schema: { type: 'object', properties: { diary: { type: 'string' } } } } },
+          content: { 'application/json': { schema: z.object({ diary: z.string() }) } },
         },
         responses: {
           '200': {
             description: 'Diary updated',
-            ...jsonEnvelope({ type: 'object', properties: { message: { type: 'string' } } }),
+            ...jsonEnvelope(z.object({ message: z.string() })),
           },
-          '404': { description: 'Entry not found', content: { 'application/json': { schema: errorRef } } },
+          '404': errorResponse('Entry not found'),
         },
       },
     },
@@ -358,7 +211,7 @@ export const openapiSpec = {
         responses: {
           '200': {
             description: 'Workout results',
-            ...jsonEnvelope({ type: 'array', items: { $ref: '#/components/schemas/WorkoutResult' } }),
+            ...jsonEnvelope(z.array(ZWorkoutResult)),
           },
         },
       },
@@ -383,9 +236,9 @@ export const openapiSpec = {
         responses: {
           '200': {
             description: 'Week summary with all daily entries for that week',
-            ...jsonEnvelope({ type: 'array', items: { $ref: '#/components/schemas/DailyEntry' } }),
+            ...jsonEnvelope(z.array(ZDailyEntry)),
           },
-          '404': { description: 'Week not found', content: { 'application/json': { schema: errorRef } } },
+          '404': errorResponse('Week not found'),
         },
       },
     },
@@ -396,24 +249,10 @@ export const openapiSpec = {
         responses: {
           '200': {
             description: 'List of exercises',
-            ...jsonEnvelope({ type: 'array', items: { type: 'object', properties: { name: { type: 'string' } } } }),
+            ...jsonEnvelope(z.array(z.object({ name: z.string() }))),
           },
         },
       },
     },
   },
-  components: {
-    schemas: {
-      Links,
-      ErrorResponse,
-      Track,
-      Running,
-      WorkoutResult,
-      Workout,
-      DailyEntry,
-      DailyEntryInput,
-      DailyEntryUpdate,
-      Stats,
-    },
-  },
-};
+});
