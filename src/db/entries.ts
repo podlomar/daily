@@ -248,6 +248,8 @@ export const createDailyEntry = (input: DailyEntryInput): Result<string[], strin
       input.diary ?? null
     );
 
+    report.push(`Daily entry for ${date} created successfully`);
+
     if (
       input.workout !== undefined
       && input.workout.routine !== 'rest'
