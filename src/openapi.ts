@@ -1,5 +1,6 @@
 import * as z from 'zod';
 import { createDocument } from 'zod-openapi';
+import pkg from '../package.json' with { type: 'json' };
 import { ZLinks, ZErrorResponse } from './db/schema.js';
 import { ZTrack, ZRunning } from './db/tracks.js';
 import { ZWorkoutResult, ZWorkout } from './db/workouts.js';
@@ -32,7 +33,7 @@ export const openapiSpec = createDocument({
   openapi: '3.1.0',
   info: {
     title: 'Daily Fitness Tracker API',
-    version: '1.0.0',
+    version: pkg.version,
     description: 'Personal fitness tracking REST API for daily entries including running, workouts, weight, meals, stretching, stairs, and diary notes.',
   },
   paths: {
