@@ -27,6 +27,7 @@ describe('GET /api', () => {
     assert.ok(paths.includes('/stats'));
     assert.ok(paths.includes('/summary'));
     assert.ok(paths.includes('/exercises'));
+    assert.ok(paths.includes('/meals'));
   });
 
   it('includes component schemas', async () => {
@@ -36,5 +37,6 @@ describe('GET /api', () => {
     assert.ok(schemas.includes('DailyEntry'));
     assert.ok(schemas.includes('DailyEntryInput'));
     assert.ok(schemas.includes('ErrorResponse'));
+    assert.ok(schemas.includes('Meal'));
   });
 });

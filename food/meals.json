@@ -1,0 +1,20 @@
+[
+  {
+    "id": "medovy-jogurt-s-corn-flakes",
+    "name": "Medový jogurt s corn flakes",
+    "ingredients": [
+      {
+        "id": "med-kvetovy-pastovany",
+        "quantity": "10g"
+      },
+      {
+        "id": "recky-jogurt-bily-0",
+        "quantity": "80g"
+      },
+      {
+        "id": "corn-flakes",
+        "quantity": "10g"
+      }
+    ]
+  }
+]

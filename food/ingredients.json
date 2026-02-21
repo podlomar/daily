@@ -1,0 +1,27 @@
+[
+  {
+    "id": "med-kvetovy-pastovany",
+    "name": "Med, květový, pastovaný",
+    "energy": {
+      "portion": "100g",
+      "kcal": 328
+    }
+  },
+  {
+    "id": "recky-jogurt-bily-0",
+    "name": "Řecký jogurt, bílý, 0%",
+    "url": "https://www.kosik.cz/p74557-milko-recky-jogurt-bily-0",
+    "energy": {
+      "portion": "100g",
+      "kcal": 67
+    }
+  },
+  {
+    "id": "corn-flakes",
+    "name": "Corn flakes, kukuřičné lupínky",
+    "energy": {
+      "portion": "100g",
+      "kcal": 386
+    }
+  }
+]

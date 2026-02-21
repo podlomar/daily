@@ -6,6 +6,7 @@ import { ZTrack, ZRunning } from './db/tracks.js';
 import { ZWorkoutResult, ZWorkout } from './db/workouts.js';
 import { ZDailyEntry, ZDailyEntryInput, ZDailyEntryUpdate } from './db/entries.js';
 import { ZStats } from './db/stats.js';
+import { ZMeal } from './food/meals.js';
 
 const envelopeOf = (resultSchema: z.ZodType) => z.object({
   links: ZLinks,
@@ -240,6 +241,18 @@ export const openapiSpec = createDocument({
             ...jsonEnvelope(z.array(ZDailyEntry)),
           },
           '404': errorResponse('Week not found'),
+        },
+      },
+    },
+    '/meals': {
+      get: {
+        summary: 'List all meals with computed calories',
+        operationId: 'getMeals',
+        responses: {
+          '200': {
+            description: 'List of meals',
+            ...jsonEnvelope(z.array(ZMeal)),
+          },
         },
       },
     },

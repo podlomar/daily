@@ -4,6 +4,7 @@ import yaml from 'js-yaml';
 import type { DailyEntryInput } from './db/entries.js';
 import { getAllTracks, getTrackById, getAllDailyEntries, buildDiary, getDailyEntryByDate, updateDailyEntry, getWeekSummary, createDailyEntry, createTrack, getWorkoutResultsByDate, collectStats, workoutsSummary, getExercises } from './db/index.js';
 import { parseDailyEntryYaml, parseDailyEntryJson } from './parsers/index.js';
+import { getMeals } from './food/meals.js';
 import { Result } from 'monadix/result';
 import { openapiSpec } from './openapi.js';
 
@@ -242,6 +243,15 @@ app.get('/week/:week', (req: Request, res: Response) => {
     }
   } catch (error) {
     res.status(500).json({ error: 'Failed to retrieve week summary' });
+  }
+});
+
+app.get('/meals', (req: Request, res: Response) => {
+  try {
+    const meals = getMeals();
+    res.status(200).json(envelope(req, meals));
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to retrieve meals' });
   }
 });
 
