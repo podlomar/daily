@@ -16,5 +16,27 @@
         "quantity": "10g"
       }
     ]
+  },
+  {
+    "id": "knackebrot-s-avokadem-a-smazenym-vajcem",
+    "name": "Knäckebrot s avokádem a smaženým vajcem",
+    "ingredients": [
+      {
+        "id": "avokado",
+        "quantity": "120g"
+      },
+      {
+        "id": "racio-knackebrot-zitny",
+        "quantity": "4"
+      },
+      {
+        "id": "extra-panensky-olivovy-olej",
+        "quantity": "20ml"
+      },
+      {
+        "id": "smazene-vajce",
+        "quantity": "3"
+      }
+    ]
   }
 ]

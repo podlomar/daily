@@ -22,12 +22,18 @@ const ingredientsMap = new Map(
   ingredientsData.map((i) => [i.id, i]),
 );
 
-const parseGrams = (quantity: string): number => {
-  return parseFloat(quantity.replace('g', ''));
+const parseQuantity = (value: string): number => {
+  return parseFloat(value.replace(/[a-z]+$/i, ''));
 };
 
-const parsePortionGrams = (portion: string): number => {
-  return parseFloat(portion.replace('g', ''));
+const computeKcal = (
+  portion: string,
+  kcalPerPortion: number,
+  quantity: string,
+): number => {
+  const qty = parseQuantity(quantity);
+  const portionSize = parseQuantity(portion);
+  return Math.round((kcalPerPortion * qty) / portionSize);
 };
 
 export const getMeals = (): Meal[] => {
@@ -38,9 +44,7 @@ export const getMeals = (): Meal[] => {
         throw new Error(`Unknown ingredient: ${ref.id}`);
       }
 
-      const quantityGrams = parseGrams(ref.quantity);
-      const portionGrams = parsePortionGrams(ingredient.energy.portion);
-      const kcal = Math.round((ingredient.energy.kcal * quantityGrams) / portionGrams);
+      const kcal = computeKcal(ingredient.energy.portion, ingredient.energy.kcal, ref.quantity);
 
       return {
         id: ingredient.id,

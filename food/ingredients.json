@@ -2,6 +2,7 @@
   {
     "id": "med-kvetovy-pastovany",
     "name": "Med, květový, pastovaný",
+    "url": "https://www.kosik.cz/p786444-medokom-cesky-med-kvetovy-pastovany",
     "energy": {
       "portion": "100g",
       "kcal": 328
@@ -22,6 +23,39 @@
     "energy": {
       "portion": "100g",
       "kcal": 386
+    }
+  },
+  {
+    "id": "racio-knackebrot-zitny",
+    "name": "Racio knäckebrot žitný",
+    "energy": {
+      "portion": "1",
+      "kcal": 43
+    }
+  },
+  {
+    "id": "avokado",
+    "name": "Avokádo",
+    "energy": {
+      "portion": "100g",
+      "kcal": 160
+    }
+  },
+  {
+    "id": "smazene-vajce",
+    "name": "Smažené vajce",
+    "energy": {
+      "portion": "1",
+      "size": "55g",
+      "kcal": 110
+    }
+  },
+  {
+    "id": "extra-panensky-olivovy-olej",
+    "name": "Extra panenský olivový olej",
+    "energy": {
+      "portion": "100ml",
+      "kcal": 821
     }
   }
 ]
