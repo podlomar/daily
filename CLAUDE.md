@@ -34,6 +34,8 @@ This is a personal fitness tracking REST API built with Express 5 and TypeScript
 - [src/db/connection.ts](src/db/connection.ts) - SQLite database initialization (configurable via `DB_PATH` env var)
 - [src/db/index.ts](src/db/index.ts) - Re-exports from all db modules
 - [src/parsers/daily-entry.ts](src/parsers/daily-entry.ts) - YAML/JSON input parsing for daily entries
+- [src/food/meals.ts](src/food/meals.ts) - Meal calorie computation from ingredient JSON data
+- [food/](food/) - JSON data files for ingredients and meals
 - [sql/schema.sql](sql/schema.sql) - Database schema definition
 - [test/](test/) - Mocha + Supertest API integration tests
 
@@ -45,13 +47,24 @@ This is a personal fitness tracking REST API built with Express 5 and TypeScript
 - YAML input format uses compact strings (e.g., `run: "regular track-id 5.2 3"`)
 - Database file: `db.local.sqlite` in project root (overridden by `DB_PATH` env var, `:memory:` for tests)
 - API responses wrapped in envelope: `{ links: { self, ... }, result }` for success, `{ error, details? }` for errors
+- Cookie-based authentication: all data endpoints require a `token` cookie matching `AUTH_TOKEN` env var
+- `.env` file loaded at startup via `process.loadEnvFile()`; server refuses to start without `AUTH_TOKEN`
+- Public routes (`/health`, `/api`) are exempt from authentication
+
+### Authentication
+
+The server requires a `.env` file with `AUTH_TOKEN=<secret>`. All data endpoints check for a `token` cookie matching this value. The `/health` and `/api` endpoints are public.
 
 ### API Endpoints
 
+**Public (no auth required):**
+- `GET /health` - Health check
 - `GET /api` - OpenAPI 3.1 spec (JSON)
+
+**Protected (require `token` cookie):**
 - `GET /entries`, `GET /entries/:date`, `POST /entries`, `PATCH /entries/:date`
 - `GET /tracks`, `GET /tracks/:id`, `POST /tracks`
 - `GET /workouts/:date`, `GET /week/:week`
 - `GET /stats`, `GET /summary`, `GET /exercises`
+- `GET /meals`
 - `GET /diary`, `POST /entries/:date/diary`
-- `GET /health`
