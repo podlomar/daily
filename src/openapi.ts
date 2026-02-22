@@ -27,10 +27,12 @@ const dateParam = {
   in: 'path' as const,
   required: true,
   schema: { type: 'string' as const },
-  description: 'Date in YYYY-MM-DD format, or "today"',
+  description: 'Date in YYYY-MM-DD format (e.g. "2026-02-22"). The special value "today" resolves to the current server date.',
 };
 
 const unauthorizedResponse = errorResponse('Missing or invalid authentication cookie');
+
+const PORT = process.env.PORT || 4321;
 
 export const openapiSpec = createDocument({
   openapi: '3.1.0',
@@ -39,6 +41,9 @@ export const openapiSpec = createDocument({
     version: pkg.version,
     description: 'Personal fitness tracking REST API for daily entries including running, workouts, weight, meals, stretching, stairs, and diary notes.',
   },
+  servers: [
+    { url: `http://localhost:${PORT}`, description: 'Local development server' },
+  ],
   components: {
     securitySchemes: {
       cookieAuth: {
@@ -50,6 +55,19 @@ export const openapiSpec = createDocument({
   },
   security: [{ cookieAuth: [] }],
   paths: {
+    '/api': {
+      get: {
+        summary: 'OpenAPI specification',
+        operationId: 'getApiSpec',
+        security: [],
+        responses: {
+          '200': {
+            description: 'OpenAPI 3.1 JSON specification for this API',
+            content: { 'application/json': { schema: { type: 'object' } } },
+          },
+        },
+      },
+    },
     '/health': {
       get: {
         summary: 'Health check',
