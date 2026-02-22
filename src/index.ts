@@ -1,4 +1,6 @@
+import { existsSync } from 'node:fs';
 import express, { Request, Response } from 'express';
+import cookieParser from 'cookie-parser';
 import dayjs from 'dayjs';
 import yaml from 'js-yaml';
 import type { DailyEntryInput } from './db/entries.js';
@@ -18,6 +20,7 @@ const envelope = (req: Request, result: any, links?: Record<string, string>) => 
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 app.use((req: Request, res: Response, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, OPTIONS');
@@ -54,6 +57,14 @@ app.get('/health', (req: Request, res: Response) => {
     timestamp: new Date().toISOString(),
     uptime: process.uptime()
   }));
+});
+
+app.use((req: Request, res: Response, next) => {
+  if (req.cookies.token === process.env.AUTH_TOKEN) {
+    next();
+  } else {
+    res.status(401).json({ error: 'Unauthorized' });
+  }
 });
 
 app.get('/stats', (req: Request, res: Response) => {
@@ -265,6 +276,15 @@ app.get('/exercises', (req: Request, res: Response) => {
 });
 
 if (process.argv[1] && import.meta.url.endsWith(process.argv[1].replace(/\\/g, '/'))) {
+  if (existsSync('.env')) {
+    process.loadEnvFile('.env');
+  }
+
+  if (!process.env.AUTH_TOKEN) {
+    console.error('AUTH_TOKEN is not set. Create a .env file with AUTH_TOKEN=<your-secret>');
+    process.exit(1);
+  }
+
   app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
   });

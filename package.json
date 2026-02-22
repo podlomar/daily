@@ -15,6 +15,7 @@
   "description": "",
   "dependencies": {
     "better-sqlite3": "^12.5.0",
+    "cookie-parser": "^1.4.7",
     "dayjs": "^1.11.19",
     "express": "^5.2.1",
     "js-yaml": "^4.1.1",
@@ -24,6 +25,7 @@
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",
+    "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.6",
     "@types/js-yaml": "^4.0.9",
     "@types/mocha": "^10.0.10",

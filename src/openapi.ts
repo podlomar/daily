@@ -30,6 +30,8 @@ const dateParam = {
   description: 'Date in YYYY-MM-DD format, or "today"',
 };
 
+const unauthorizedResponse = errorResponse('Missing or invalid authentication cookie');
+
 export const openapiSpec = createDocument({
   openapi: '3.1.0',
   info: {
@@ -37,11 +39,22 @@ export const openapiSpec = createDocument({
     version: pkg.version,
     description: 'Personal fitness tracking REST API for daily entries including running, workouts, weight, meals, stretching, stairs, and diary notes.',
   },
+  components: {
+    securitySchemes: {
+      cookieAuth: {
+        type: 'apiKey',
+        in: 'cookie',
+        name: 'token',
+      },
+    },
+  },
+  security: [{ cookieAuth: [] }],
   paths: {
     '/health': {
       get: {
         summary: 'Health check',
         operationId: 'getHealth',
+        security: [],
         responses: {
           '200': {
             description: 'Service status',
@@ -63,6 +76,7 @@ export const openapiSpec = createDocument({
             description: 'Running stats',
             ...jsonEnvelope(ZStats),
           },
+          '401': unauthorizedResponse,
         },
       },
     },
@@ -75,6 +89,7 @@ export const openapiSpec = createDocument({
             description: 'Map of exercise names to their volume history',
             ...jsonEnvelope(z.record(z.string(), z.array(z.number()))),
           },
+          '401': unauthorizedResponse,
         },
       },
     },
@@ -87,6 +102,7 @@ export const openapiSpec = createDocument({
             description: 'List of tracks',
             ...jsonEnvelope(z.array(ZTrack)),
           },
+          '401': unauthorizedResponse,
         },
       },
       post: {
@@ -101,6 +117,7 @@ export const openapiSpec = createDocument({
             description: 'Track created',
             ...jsonEnvelope(z.object({ message: z.string() })),
           },
+          '401': unauthorizedResponse,
           '500': errorResponse('Server error'),
         },
       },
@@ -115,6 +132,7 @@ export const openapiSpec = createDocument({
             description: 'Track details',
             ...jsonEnvelope(ZTrack),
           },
+          '401': unauthorizedResponse,
           '404': errorResponse('Track not found'),
         },
       },
@@ -128,6 +146,7 @@ export const openapiSpec = createDocument({
             description: 'List of daily entries',
             ...jsonEnvelope(z.array(ZDailyEntry)),
           },
+          '401': unauthorizedResponse,
         },
       },
       post: {
@@ -154,6 +173,7 @@ export const openapiSpec = createDocument({
             })),
           },
           '400': errorResponse('Validation error'),
+          '401': unauthorizedResponse,
         },
       },
     },
@@ -167,6 +187,7 @@ export const openapiSpec = createDocument({
             description: 'Daily entry with navigation links (previous, next)',
             ...jsonEnvelope(ZDailyEntry),
           },
+          '401': unauthorizedResponse,
           '404': errorResponse('Entry not found'),
         },
       },
@@ -183,6 +204,7 @@ export const openapiSpec = createDocument({
             description: 'Entry updated',
             ...jsonEnvelope(z.object({ message: z.string() })),
           },
+          '401': unauthorizedResponse,
           '404': errorResponse('Entry not found'),
         },
       },
@@ -201,6 +223,7 @@ export const openapiSpec = createDocument({
             description: 'Diary updated',
             ...jsonEnvelope(z.object({ message: z.string() })),
           },
+          '401': unauthorizedResponse,
           '404': errorResponse('Entry not found'),
         },
       },
@@ -215,6 +238,7 @@ export const openapiSpec = createDocument({
             description: 'Workout results',
             ...jsonEnvelope(z.array(ZWorkoutResult)),
           },
+          '401': unauthorizedResponse,
         },
       },
     },
@@ -227,6 +251,7 @@ export const openapiSpec = createDocument({
             description: 'Diary text',
             content: { 'text/plain': { schema: { type: 'string' } } },
           },
+          '401': unauthorizedResponse,
         },
       },
     },
@@ -240,6 +265,7 @@ export const openapiSpec = createDocument({
             description: 'Week summary with all daily entries for that week',
             ...jsonEnvelope(z.array(ZDailyEntry)),
           },
+          '401': unauthorizedResponse,
           '404': errorResponse('Week not found'),
         },
       },
@@ -253,6 +279,7 @@ export const openapiSpec = createDocument({
             description: 'List of meals',
             ...jsonEnvelope(z.array(ZMeal)),
           },
+          '401': unauthorizedResponse,
         },
       },
     },
@@ -265,6 +292,7 @@ export const openapiSpec = createDocument({
             description: 'List of exercises',
             ...jsonEnvelope(z.array(z.object({ name: z.string() }))),
           },
+          '401': unauthorizedResponse,
         },
       },
     },
