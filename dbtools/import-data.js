@@ -7,7 +7,7 @@ import isoWeek from 'dayjs/plugin/isoWeek.js'
 
 dayjs.extend(isoWeek);
 
-const dbPath = path.join(process.cwd(), 'db.local.sqlite');
+const dbPath = path.join(process.cwd(), 'db.sqlite');
 const db = new Database(dbPath);
 
 const slugify = (text) => {

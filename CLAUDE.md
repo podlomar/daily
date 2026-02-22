@@ -45,7 +45,7 @@ This is a personal fitness tracking REST API built with Express 5 and TypeScript
 - Uses `monadix/result` for Result type error handling
 - Supports both JSON and YAML request bodies (Content-Type: application/yaml)
 - YAML input format uses compact strings (e.g., `run: "regular track-id 5.2 3"`)
-- Database file: `db.local.sqlite` in project root (overridden by `DB_PATH` env var, `:memory:` for tests)
+- Database file: `db.sqlite` in project root (overridden by `DB_PATH` env var, `:memory:` for tests)
 - API responses wrapped in envelope: `{ links: { self, ... }, result }` for success, `{ error, details? }` for errors
 - Cookie-based authentication: all data endpoints require a `token` cookie matching `AUTH_TOKEN` env var
 - `.env` file loaded at startup via `process.loadEnvFile()`; server refuses to start without `AUTH_TOKEN`

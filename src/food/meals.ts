@@ -1,6 +1,6 @@
 import * as z from 'zod';
-import ingredientsData from '../../food/ingredients.json' with { type: 'json' };
-import mealsData from '../../food/meals.json' with { type: 'json' };
+import ingredientsData from '../../data/ingredients.json' with { type: 'json' };
+import mealsData from '../../data/meals.json' with { type: 'json' };
 
 const ZMealIngredient = z.object({
   id: z.string(),

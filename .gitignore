@@ -3,6 +3,9 @@
 *.local
 *.local.*
 
+# Database files
+*.sqlite
+
 # AI agents
 .claude
 

@@ -1,6 +1,6 @@
 import Database from 'better-sqlite3';
 
-const db = new Database('./db.local.sqlite', { readonly: true });
+const db = new Database('./db.sqlite', { readonly: true });
 
 const rows = db.prepare('SELECT * FROM workout_results').all();
 
