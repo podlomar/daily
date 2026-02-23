@@ -1,4 +1,5 @@
 import { existsSync } from 'node:fs';
+import path from 'node:path';
 import express, { Request, Response } from 'express';
 import cookieParser from 'cookie-parser';
 import dayjs from 'dayjs';
@@ -57,6 +58,19 @@ app.get('/health', (req: Request, res: Response) => {
     timestamp: new Date().toISOString(),
     uptime: process.uptime()
   }));
+});
+
+// Serve frontend static files before auth so the app shell is always accessible
+const frontendDist = path.join(process.cwd(), 'frontend', 'dist');
+const API_PREFIXES = ['/stats', '/entries', '/tracks', '/meals', '/health', '/api', '/exercises', '/workouts', '/diary', '/week', '/summary'];
+app.use(express.static(frontendDist));
+app.get('/{*path}', (req: Request, res: Response, next) => {
+  const isApiPath = API_PREFIXES.some((p) => req.path === p || req.path.startsWith(p + '/'));
+  if (isApiPath) {
+    next();
+  } else {
+    res.sendFile(path.join(frontendDist, 'index.html'));
+  }
 });
 
 app.use((req: Request, res: Response, next) => {
