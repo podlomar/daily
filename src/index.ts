@@ -61,16 +61,9 @@ app.get('/health', (req: Request, res: Response) => {
   }));
 });
 
-// Serve frontend static files before auth so the app shell is always accessible
+// Frontend static files
 const frontendDist = path.join(process.cwd(), 'frontend', 'dist');
 app.use(express.static(frontendDist));
-app.get('/{*path}', (req: Request, res: Response, next) => {
-  if (req.path === '/health' || req.path.startsWith('/api')) {
-    next();
-  } else {
-    res.sendFile(path.join(frontendDist, 'index.html'));
-  }
-});
 
 // Protected API router — all routes under /api/* require authentication
 const router = Router();
@@ -292,6 +285,11 @@ router.get('/exercises', (req: Request, res: Response) => {
 });
 
 app.use('/api', router);
+
+// SPA fallback — serve index.html for any unmatched GET (frontend routes)
+app.get('/{*path}', (_req: Request, res: Response) => {
+  res.sendFile(path.join(frontendDist, 'index.html'));
+});
 
 if (process.argv[1] && import.meta.url.endsWith(process.argv[1].replace(/\\/g, '/'))) {
   if (existsSync('.env')) {
