@@ -14,14 +14,14 @@ describe('Authentication', () => {
   });
 
   it('rejects protected endpoint without cookie', async () => {
-    const res = await unauthRequest.get('/entries');
+    const res = await unauthRequest.get('/api/entries');
     assert.equal(res.status, 401);
     assert.equal(res.body.error, 'Unauthorized');
   });
 
   it('rejects protected endpoint with wrong cookie', async () => {
     const res = await unauthRequest
-      .get('/entries')
+      .get('/api/entries')
       .set('Cookie', 'token=wrong-value');
     assert.equal(res.status, 401);
   });

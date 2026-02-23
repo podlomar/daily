@@ -29,23 +29,23 @@ const sampleEntry = {
 
 describe('Entries API', () => {
   before(async () => {
-    await request.post('/tracks').send(sampleTrack);
+    await request.post('/api/tracks').send(sampleTrack);
   });
 
   describe('POST /entries (JSON)', () => {
     it('creates an entry and returns 201', async () => {
       const res = await request
-        .post('/entries')
+        .post('/api/entries')
         .set('Content-Type', 'application/json')
         .send(sampleEntry);
       assert.equal(res.status, 201);
-      assert.equal(res.body.links.self, '/entries');
+      assert.equal(res.body.links.self, '/api/entries');
       assert.equal(res.body.result.message, 'Daily entry created successfully');
     });
 
     it('rejects invalid input with 400', async () => {
       const res = await request
-        .post('/entries')
+        .post('/api/entries')
         .set('Content-Type', 'application/json')
         .send({ date: 'not-a-date' });
       assert.equal(res.status, 400);
@@ -54,7 +54,7 @@ describe('Entries API', () => {
 
     it('rejects unknown track ID with 400', async () => {
       const res = await request
-        .post('/entries')
+        .post('/api/entries')
         .set('Content-Type', 'application/json')
         .send({
           date: '2026-02-20',
@@ -73,9 +73,9 @@ describe('Entries API', () => {
 
   describe('GET /entries/:date', () => {
     it('returns the created entry with navigation links', async () => {
-      const res = await request.get(`/entries/${testDate}`);
+      const res = await request.get(`/api/entries/${testDate}`);
       assert.equal(res.status, 200);
-      assert.equal(res.body.links.self, `/entries/${testDate}`);
+      assert.equal(res.body.links.self, `/api/entries/${testDate}`);
       assert.ok(res.body.links.previous);
       assert.ok(res.body.links.next);
       assert.equal(res.body.result.date, testDate);
@@ -85,7 +85,7 @@ describe('Entries API', () => {
     });
 
     it('returns 404 for unknown date', async () => {
-      const res = await request.get('/entries/1999-01-01');
+      const res = await request.get('/api/entries/1999-01-01');
       assert.equal(res.status, 404);
     });
   });
@@ -93,19 +93,19 @@ describe('Entries API', () => {
   describe('PATCH /entries/:date', () => {
     it('updates entry fields', async () => {
       const res = await request
-        .patch(`/entries/${testDate}`)
+        .patch(`/api/entries/${testDate}`)
         .send({ weight: 76.0, stretching: 'yes' });
       assert.equal(res.status, 200);
-      assert.equal(res.body.links.self, `/entries/${testDate}`);
+      assert.equal(res.body.links.self, `/api/entries/${testDate}`);
 
-      const check = await request.get(`/entries/${testDate}`);
+      const check = await request.get(`/api/entries/${testDate}`);
       assert.equal(check.body.result.weight, 76.0);
       assert.equal(check.body.result.stretching, 'yes');
     });
 
     it('returns 404 for unknown date', async () => {
       const res = await request
-        .patch('/entries/1999-01-01')
+        .patch('/api/entries/1999-01-01')
         .send({ weight: 80 });
       assert.equal(res.status, 404);
     });
@@ -113,9 +113,9 @@ describe('Entries API', () => {
 
   describe('GET /entries', () => {
     it('returns all entries', async () => {
-      const res = await request.get('/entries');
+      const res = await request.get('/api/entries');
       assert.equal(res.status, 200);
-      assert.equal(res.body.links.self, '/entries');
+      assert.equal(res.body.links.self, '/api/entries');
       assert.ok(Array.isArray(res.body.result));
       assert.ok(res.body.result.length >= 1);
     });

@@ -21,10 +21,10 @@ async function request<T>(path: string): Promise<ApiEnvelope<T>> {
 }
 
 export const api = {
-  getStats: () => request<Stats>('/stats'),
-  getEntries: () => request<DailyEntry[]>('/entries'),
-  getEntry: (date: string) => request<DailyEntry>(`/entries/${date}`),
-  getMeals: () => request<Meal[]>('/meals'),
+  getStats: () => request<Stats>('/api/stats'),
+  getEntries: () => request<DailyEntry[]>('/api/entries'),
+  getEntry: (date: string) => request<DailyEntry>(`/api/entries/${date}`),
+  getMeals: () => request<Meal[]>('/api/meals'),
 };
 
 export { UnauthorizedError };

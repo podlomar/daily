@@ -17,7 +17,7 @@ export const LoginPage = () => {
 
     document.cookie = `token=${trimmed}; path=/; SameSite=Strict`;
 
-    const res = await fetch('/stats', { credentials: 'same-origin' });
+    const res = await fetch('/api/stats', { credentials: 'same-origin' });
     if (res.status === 401) {
       document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/';
       setError('Invalid token');

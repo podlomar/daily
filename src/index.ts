@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs';
 import path from 'node:path';
-import express, { Request, Response } from 'express';
+import express, { Request, Response, Router } from 'express';
 import cookieParser from 'cookie-parser';
 import dayjs from 'dayjs';
 import yaml from 'js-yaml';
@@ -48,6 +48,7 @@ app.use((req: Request, res: Response, next) => {
   }
 });
 
+// Public routes (no auth required)
 app.get('/api', (req: Request, res: Response) => {
   res.status(200).json(openapiSpec);
 });
@@ -62,18 +63,19 @@ app.get('/health', (req: Request, res: Response) => {
 
 // Serve frontend static files before auth so the app shell is always accessible
 const frontendDist = path.join(process.cwd(), 'frontend', 'dist');
-const API_PREFIXES = ['/stats', '/entries', '/tracks', '/meals', '/health', '/api', '/exercises', '/workouts', '/diary', '/week', '/summary'];
 app.use(express.static(frontendDist));
 app.get('/{*path}', (req: Request, res: Response, next) => {
-  const isApiPath = API_PREFIXES.some((p) => req.path === p || req.path.startsWith(p + '/'));
-  if (isApiPath) {
+  if (req.path === '/health' || req.path.startsWith('/api')) {
     next();
   } else {
     res.sendFile(path.join(frontendDist, 'index.html'));
   }
 });
 
-app.use((req: Request, res: Response, next) => {
+// Protected API router — all routes under /api/* require authentication
+const router = Router();
+
+router.use((req: Request, res: Response, next) => {
   if (req.cookies.token === process.env.AUTH_TOKEN) {
     next();
   } else {
@@ -81,7 +83,7 @@ app.use((req: Request, res: Response, next) => {
   }
 });
 
-app.get('/stats', (req: Request, res: Response) => {
+router.get('/stats', (req: Request, res: Response) => {
   try {
     const stats = collectStats();
     res.status(200).json(envelope(req, stats));
@@ -91,7 +93,7 @@ app.get('/stats', (req: Request, res: Response) => {
   }
 });
 
-app.get('/summary', (req: Request, res: Response) => {
+router.get('/summary', (req: Request, res: Response) => {
   try {
     const results = workoutsSummary();
     res.status(200).json(envelope(req, results));
@@ -100,7 +102,7 @@ app.get('/summary', (req: Request, res: Response) => {
   }
 });
 
-app.get('/tracks', (req: Request, res: Response) => {
+router.get('/tracks', (req: Request, res: Response) => {
   try {
     const tracks = getAllTracks();
     res.status(200).json(envelope(req, tracks));
@@ -109,7 +111,7 @@ app.get('/tracks', (req: Request, res: Response) => {
   }
 });
 
-app.get('/tracks/:id', (req: Request, res: Response) => {
+router.get('/tracks/:id', (req: Request, res: Response) => {
   try {
     const id = req.params.id;
     const track = getTrackById(id);
@@ -124,7 +126,7 @@ app.get('/tracks/:id', (req: Request, res: Response) => {
   }
 });
 
-app.post('/tracks', (req: Request, res: Response) => {
+router.post('/tracks', (req: Request, res: Response) => {
   try {
     const track = req.body;
     createTrack(track);
@@ -135,7 +137,7 @@ app.post('/tracks', (req: Request, res: Response) => {
   }
 });
 
-app.get('/entries', (req: Request, res: Response) => {
+router.get('/entries', (req: Request, res: Response) => {
   try {
     const entries = getAllDailyEntries();
     res.status(200).json(envelope(req, entries));
@@ -145,7 +147,7 @@ app.get('/entries', (req: Request, res: Response) => {
   }
 });
 
-app.post('/entries', (req: Request, res: Response) => {
+router.post('/entries', (req: Request, res: Response) => {
   const entryInit = req.body;
 
   let result: Result<DailyEntryInput, string[]> | null = null;
@@ -181,7 +183,7 @@ app.post('/entries', (req: Request, res: Response) => {
 });
 
 
-app.get('/entries/:date', (req: Request, res: Response) => {
+router.get('/entries/:date', (req: Request, res: Response) => {
   try {
     const { date } = req.params;
     const queryDate = date === 'today' ? dayjs().format('YYYY-MM-DD') : date;
@@ -189,8 +191,8 @@ app.get('/entries/:date', (req: Request, res: Response) => {
 
     if (entry) {
       res.status(200).json(envelope(req, entry, {
-        previous: `/entries/${dayjs(queryDate).subtract(1, 'day').format('YYYY-MM-DD')}`,
-        next: `/entries/${dayjs(queryDate).add(1, 'day').format('YYYY-MM-DD')}`,
+        previous: `/api/entries/${dayjs(queryDate).subtract(1, 'day').format('YYYY-MM-DD')}`,
+        next: `/api/entries/${dayjs(queryDate).add(1, 'day').format('YYYY-MM-DD')}`,
       }));
     } else {
       res.status(404).json({ error: 'Entry not found' });
@@ -200,7 +202,7 @@ app.get('/entries/:date', (req: Request, res: Response) => {
   }
 });
 
-app.patch('/entries/:date', (req: Request, res: Response) => {
+router.patch('/entries/:date', (req: Request, res: Response) => {
   try {
     const date = req.params.date;
     const entryUpdate = req.body;
@@ -216,7 +218,7 @@ app.patch('/entries/:date', (req: Request, res: Response) => {
   }
 });
 
-app.post('/entries/:date/diary', (req: Request, res: Response) => {
+router.post('/entries/:date/diary', (req: Request, res: Response) => {
   try {
     const date = req.params.date;
 
@@ -236,7 +238,7 @@ app.post('/entries/:date/diary', (req: Request, res: Response) => {
   }
 });
 
-app.get('/workouts/:date', (req: Request, res: Response) => {
+router.get('/workouts/:date', (req: Request, res: Response) => {
   try {
     const date = req.params.date;
     const results = getWorkoutResultsByDate(date);
@@ -246,7 +248,7 @@ app.get('/workouts/:date', (req: Request, res: Response) => {
   }
 });
 
-app.get('/diary', (req: Request, res: Response) => {
+router.get('/diary', (req: Request, res: Response) => {
   try {
     const diary = buildDiary();
     res.setHeader('Content-Type', 'text/plain');
@@ -256,7 +258,7 @@ app.get('/diary', (req: Request, res: Response) => {
   }
 });
 
-app.get('/week/:week', (req: Request, res: Response) => {
+router.get('/week/:week', (req: Request, res: Response) => {
   try {
     const { week } = req.params;
     const summary = getWeekSummary(week);
@@ -271,7 +273,7 @@ app.get('/week/:week', (req: Request, res: Response) => {
   }
 });
 
-app.get('/meals', (req: Request, res: Response) => {
+router.get('/meals', (req: Request, res: Response) => {
   try {
     const meals = getMeals();
     res.status(200).json(envelope(req, meals));
@@ -280,7 +282,7 @@ app.get('/meals', (req: Request, res: Response) => {
   }
 });
 
-app.get('/exercises', (req: Request, res: Response) => {
+router.get('/exercises', (req: Request, res: Response) => {
   try {
     const exercises = getExercises();
     res.status(200).json(envelope(req, exercises));
@@ -288,6 +290,8 @@ app.get('/exercises', (req: Request, res: Response) => {
     res.status(500).json({ error: 'Failed to retrieve exercises' });
   }
 });
+
+app.use('/api', router);
 
 if (process.argv[1] && import.meta.url.endsWith(process.argv[1].replace(/\\/g, '/'))) {
   if (existsSync('.env')) {

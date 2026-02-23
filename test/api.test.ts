@@ -17,17 +17,17 @@ describe('GET /api', () => {
     const res = await request.get('/api');
     const paths = Object.keys(res.body.paths);
     assert.ok(paths.includes('/health'));
-    assert.ok(paths.includes('/entries'));
-    assert.ok(paths.includes('/entries/{date}'));
-    assert.ok(paths.includes('/tracks'));
-    assert.ok(paths.includes('/tracks/{id}'));
-    assert.ok(paths.includes('/workouts/{date}'));
-    assert.ok(paths.includes('/diary'));
-    assert.ok(paths.includes('/week/{week}'));
-    assert.ok(paths.includes('/stats'));
-    assert.ok(paths.includes('/summary'));
-    assert.ok(paths.includes('/exercises'));
-    assert.ok(paths.includes('/meals'));
+    assert.ok(paths.includes('/api/entries'));
+    assert.ok(paths.includes('/api/entries/{date}'));
+    assert.ok(paths.includes('/api/tracks'));
+    assert.ok(paths.includes('/api/tracks/{id}'));
+    assert.ok(paths.includes('/api/workouts/{date}'));
+    assert.ok(paths.includes('/api/diary'));
+    assert.ok(paths.includes('/api/week/{week}'));
+    assert.ok(paths.includes('/api/stats'));
+    assert.ok(paths.includes('/api/summary'));
+    assert.ok(paths.includes('/api/exercises'));
+    assert.ok(paths.includes('/api/meals'));
   });
 
   it('includes component schemas', async () => {

@@ -4,15 +4,15 @@ import { request } from './setup.js';
 
 describe('GET /meals', () => {
   it('returns 200 with array of meals', async () => {
-    const res = await request.get('/meals');
+    const res = await request.get('/api/meals');
     assert.equal(res.status, 200);
-    assert.equal(res.body.links.self, '/meals');
+    assert.equal(res.body.links.self, '/api/meals');
     assert.ok(Array.isArray(res.body.result));
     assert.ok(res.body.result.length > 0);
   });
 
   it('computes calories correctly for known meal', async () => {
-    const res = await request.get('/meals');
+    const res = await request.get('/api/meals');
     const meal = res.body.result.find(
       (m: any) => m.id === 'medovy-jogurt-s-corn-flakes',
     );

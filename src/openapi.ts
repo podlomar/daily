@@ -85,7 +85,7 @@ export const openapiSpec = createDocument({
         },
       },
     },
-    '/stats': {
+    '/api/stats': {
       get: {
         summary: 'Running statistics and streaks',
         operationId: 'getStats',
@@ -98,7 +98,7 @@ export const openapiSpec = createDocument({
         },
       },
     },
-    '/summary': {
+    '/api/summary': {
       get: {
         summary: 'Workout exercise progression summary',
         operationId: 'getSummary',
@@ -111,7 +111,7 @@ export const openapiSpec = createDocument({
         },
       },
     },
-    '/tracks': {
+    '/api/tracks': {
       get: {
         summary: 'List all running tracks',
         operationId: 'getTracks',
@@ -140,7 +140,7 @@ export const openapiSpec = createDocument({
         },
       },
     },
-    '/tracks/{id}': {
+    '/api/tracks/{id}': {
       get: {
         summary: 'Get a running track by ID',
         operationId: 'getTrackById',
@@ -155,7 +155,7 @@ export const openapiSpec = createDocument({
         },
       },
     },
-    '/entries': {
+    '/api/entries': {
       get: {
         summary: 'List all daily entries',
         operationId: 'getEntries',
@@ -195,7 +195,7 @@ export const openapiSpec = createDocument({
         },
       },
     },
-    '/entries/{date}': {
+    '/api/entries/{date}': {
       get: {
         summary: 'Get a daily entry by date',
         operationId: 'getEntryByDate',
@@ -227,7 +227,7 @@ export const openapiSpec = createDocument({
         },
       },
     },
-    '/entries/{date}/diary': {
+    '/api/entries/{date}/diary': {
       post: {
         summary: 'Update diary text for a daily entry',
         operationId: 'updateDiary',
@@ -246,7 +246,7 @@ export const openapiSpec = createDocument({
         },
       },
     },
-    '/workouts/{date}': {
+    '/api/workouts/{date}': {
       get: {
         summary: 'Get workout results for a date',
         operationId: 'getWorkoutsByDate',
@@ -260,7 +260,7 @@ export const openapiSpec = createDocument({
         },
       },
     },
-    '/diary': {
+    '/api/diary': {
       get: {
         summary: 'Get all diary entries as plain text',
         operationId: 'getDiary',
@@ -273,7 +273,7 @@ export const openapiSpec = createDocument({
         },
       },
     },
-    '/week/{week}': {
+    '/api/week/{week}': {
       get: {
         summary: 'Get weekly summary of daily entries',
         operationId: 'getWeekSummary',
@@ -288,7 +288,7 @@ export const openapiSpec = createDocument({
         },
       },
     },
-    '/meals': {
+    '/api/meals': {
       get: {
         summary: 'List all meals with computed calories',
         operationId: 'getMeals',
@@ -301,7 +301,7 @@ export const openapiSpec = createDocument({
         },
       },
     },
-    '/exercises': {
+    '/api/exercises': {
       get: {
         summary: 'List all available exercises',
         operationId: 'getExercises',

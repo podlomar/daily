@@ -53,7 +53,7 @@ module.exports = (env, argv) => ({
     port: 3000,
     proxy: [
       {
-        context: ['/stats', '/entries', '/tracks', '/meals', '/health', '/api', '/exercises', '/workouts', '/diary', '/week', '/summary'],
+        context: ['/api', '/health'],
         target: 'http://localhost:4321',
       },
     ],

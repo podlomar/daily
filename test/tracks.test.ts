@@ -13,18 +13,18 @@ const sampleTrack = {
 describe('Tracks API', () => {
   describe('POST /tracks', () => {
     it('creates a track and returns 201', async () => {
-      const res = await request.post('/tracks').send(sampleTrack);
+      const res = await request.post('/api/tracks').send(sampleTrack);
       assert.equal(res.status, 201);
-      assert.equal(res.body.links.self, '/tracks');
+      assert.equal(res.body.links.self, '/api/tracks');
       assert.equal(res.body.result.message, 'Track created successfully');
     });
   });
 
   describe('GET /tracks', () => {
     it('returns all tracks', async () => {
-      const res = await request.get('/tracks');
+      const res = await request.get('/api/tracks');
       assert.equal(res.status, 200);
-      assert.equal(res.body.links.self, '/tracks');
+      assert.equal(res.body.links.self, '/api/tracks');
       assert.ok(Array.isArray(res.body.result));
       assert.ok(res.body.result.length >= 1);
 
@@ -37,15 +37,15 @@ describe('Tracks API', () => {
 
   describe('GET /tracks/:id', () => {
     it('returns a specific track', async () => {
-      const res = await request.get('/tracks/test-track');
+      const res = await request.get('/api/tracks/test-track');
       assert.equal(res.status, 200);
-      assert.equal(res.body.links.self, '/tracks/test-track');
+      assert.equal(res.body.links.self, '/api/tracks/test-track');
       assert.equal(res.body.result.id, 'test-track');
       assert.equal(res.body.result.progressUnit, 'km');
     });
 
     it('returns 404 for unknown track', async () => {
-      const res = await request.get('/tracks/nonexistent');
+      const res = await request.get('/api/tracks/nonexistent');
       assert.equal(res.status, 404);
     });
   });
