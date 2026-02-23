@@ -1,0 +1,50 @@
+.row {
+  display: grid;
+  grid-template-columns: 100px 60px 1fr 1fr 80px;
+  gap: var(--space-sm);
+  align-items: center;
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+  text-decoration: none;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+}
+
+.row:hover {
+  background: var(--bg-tertiary);
+  text-decoration: none;
+}
+
+.date {
+  color: var(--accent);
+}
+
+.day {
+  color: var(--text-muted);
+}
+
+.schedule {
+  font-size: var(--font-size-sm);
+}
+
+.regular {
+  color: var(--accent);
+}
+
+.adhoc {
+  color: var(--warning);
+}
+
+.void {
+  color: var(--text-muted);
+}
+
+.legacy {
+  color: var(--text-secondary);
+}
+
+.weight {
+  text-align: right;
+  color: var(--text-secondary);
+}

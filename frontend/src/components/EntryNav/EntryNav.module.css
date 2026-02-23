@@ -1,0 +1,36 @@
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-lg);
+}
+
+.link {
+  font-size: var(--font-size-sm);
+  color: var(--accent);
+  text-decoration: none;
+  padding: var(--space-xs) var(--space-sm);
+  border: var(--border);
+  border-radius: var(--radius);
+}
+
+.link:hover {
+  background: var(--accent-subtle);
+  text-decoration: none;
+}
+
+.dateHeader {
+  text-align: center;
+}
+
+.date {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+}
+
+.day {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
