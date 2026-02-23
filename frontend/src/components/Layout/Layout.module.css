@@ -29,6 +29,26 @@
   color: var(--accent);
 }
 
+.nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.navLink {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  text-decoration: none;
+  padding: var(--space-xs) var(--space-sm);
+  border: var(--border);
+  border-radius: var(--radius);
+}
+
+.navLink:hover {
+  color: var(--text-primary);
+  border-color: var(--text-secondary);
+}
+
 .logout {
   background: none;
   border: var(--border);

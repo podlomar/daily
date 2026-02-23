@@ -20,9 +20,10 @@ export const Layout = ({ children }: LayoutProps) => {
         <h1 className={styles.title}>
           <Link to="/">Daily Tracker</Link>
         </h1>
-        <button className={styles.logout} onClick={handleLogout}>
-          logout
-        </button>
+        <nav className={styles.nav}>
+          <Link to="/dashboard" className={styles.navLink}>history</Link>
+          <button className={styles.logout} onClick={handleLogout}>logout</button>
+        </nav>
       </header>
       {children}
     </div>

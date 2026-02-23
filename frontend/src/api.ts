@@ -1,4 +1,4 @@
-import type { ApiEnvelope, DailyEntry, Stats, Meal } from './types';
+import type { ApiEnvelope, DailyEntry, Stats, Meal, Track } from './types';
 
 class UnauthorizedError extends Error {
   constructor() {
@@ -25,6 +25,20 @@ export const api = {
   getEntries: () => request<DailyEntry[]>('/api/entries'),
   getEntry: (date: string) => request<DailyEntry>(`/api/entries/${date}`),
   getMeals: () => request<Meal[]>('/api/meals'),
+  getTracks: () => request<Track[]>('/api/tracks'),
+  createEntry: async (data: object): Promise<void> => {
+    const res = await fetch('/api/entries', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify(data),
+    });
+    if (res.status === 401) throw new UnauthorizedError();
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error ?? `API error: ${res.status}`);
+    }
+  },
 };
 
 export { UnauthorizedError };

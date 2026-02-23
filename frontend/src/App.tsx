@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { LoginPage } from './pages/LoginPage/LoginPage';
+import { HomePage } from './pages/HomePage/HomePage';
 import { DashboardPage } from './pages/DashboardPage/DashboardPage';
 import { EntryPage } from './pages/EntryPage/EntryPage';
 
@@ -20,6 +21,14 @@ export const App = () => (
       <Route path="/login" element={<LoginPage />} />
       <Route
         path="/"
+        element={
+          <RequireAuth>
+            <HomePage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/dashboard"
         element={
           <RequireAuth>
             <DashboardPage />
