@@ -9,7 +9,7 @@ interface EntryNavProps {
 }
 
 const toFrontendPath = (apiPath: string) =>
-  apiPath.replace(/^\/entries\//, '/entry/');
+  apiPath.replace(/^\/api\/entries\//, '/entry/');
 
 export const EntryNav = ({ date, day, previous, next }: EntryNavProps) => (
   <nav className={styles.nav}>
