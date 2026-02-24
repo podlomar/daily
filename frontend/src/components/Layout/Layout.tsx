@@ -1,5 +1,6 @@
 import { type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import pkg from '../../../package.json';
 import styles from './Layout.module.css';
 
 interface LayoutProps {
@@ -26,6 +27,7 @@ export const Layout = ({ children }: LayoutProps) => {
         </nav>
       </header>
       {children}
+      <footer className={styles.footer}>v{pkg.version}</footer>
     </div>
   );
 };

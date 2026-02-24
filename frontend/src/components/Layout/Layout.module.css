@@ -63,3 +63,12 @@
   color: var(--text-primary);
   border-color: var(--text-secondary);
 }
+
+.footer {
+  margin-top: var(--space-xl);
+  padding-top: var(--space-md);
+  border-top: var(--border);
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
