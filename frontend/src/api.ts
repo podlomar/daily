@@ -39,6 +39,19 @@ export const api = {
       throw new Error(body.error ?? `API error: ${res.status}`);
     }
   },
+  updateEntry: async (date: string, data: object): Promise<void> => {
+    const res = await fetch(`/api/entries/${date}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify(data),
+    });
+    if (res.status === 401) throw new UnauthorizedError();
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error ?? `API error: ${res.status}`);
+    }
+  },
 };
 
 export { UnauthorizedError };

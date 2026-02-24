@@ -7,6 +7,11 @@ import styles from './HomePage.module.css';
 
 const today = (): string => new Date().toISOString().slice(0, 10);
 
+const nowTime = (): string => {
+  const d = new Date();
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+};
+
 export const HomePage = () => {
   const [tracks, setTracks] = useState<Track[]>([]);
   const [todayEntry, setTodayEntry] = useState<DailyEntry | null | 'none'>(null);
@@ -18,6 +23,8 @@ export const HomePage = () => {
   const [performance, setPerformance] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [currentTime, setCurrentTime] = useState(nowTime());
+  const [lastMealSaving, setLastMealSaving] = useState(false);
 
   const navigate = useNavigate();
 
@@ -32,6 +39,25 @@ export const HomePage = () => {
       if (err instanceof UnauthorizedError) navigate('/login');
     });
   }, [navigate]);
+
+  useEffect(() => {
+    const id = setInterval(() => setCurrentTime(nowTime()), 10_000);
+    return () => clearInterval(id);
+  }, []);
+
+  const handleLastMeal = async () => {
+    if (todayEntry === null || todayEntry === 'none') return;
+    const time = nowTime();
+    setLastMealSaving(true);
+    try {
+      await api.updateEntry(todayEntry.date, { lastMeal: time });
+      setTodayEntry({ ...todayEntry, lastMeal: time });
+    } catch (err) {
+      if (err instanceof UnauthorizedError) navigate('/login');
+    } finally {
+      setLastMealSaving(false);
+    }
+  };
 
   const handleSave = async () => {
     if (!schedule) return;
@@ -86,6 +112,18 @@ export const HomePage = () => {
           <div className={styles.trackedActions}>
             <Link to={`/entry/${entry.date}`} className={styles.linkButton}>view entry</Link>
             <Link to="/dashboard" className={styles.linkButton}>history</Link>
+          </div>
+          <div className={styles.mealRow}>
+            <button
+              className={styles.mealBtn}
+              onClick={handleLastMeal}
+              disabled={lastMealSaving}
+            >
+              last meal · {currentTime}
+            </button>
+            {entry.lastMeal && (
+              <span className={styles.mealCurrent}>was {entry.lastMeal}</span>
+            )}
           </div>
         </div>
       </Layout>
