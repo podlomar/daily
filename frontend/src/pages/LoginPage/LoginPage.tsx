@@ -15,7 +15,8 @@ export const LoginPage = () => {
       return;
     }
 
-    document.cookie = `token=${trimmed}; path=/; SameSite=Strict`;
+    const expires = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toUTCString();
+    document.cookie = `token=${trimmed}; path=/; SameSite=Strict; expires=${expires}`;
 
     const res = await fetch('/api/stats', { credentials: 'same-origin' });
     if (res.status === 401) {
