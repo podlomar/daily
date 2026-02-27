@@ -98,7 +98,8 @@ const rowToDailyEntry = (row: any, workoutResults?: WorkoutResult[]): DailyEntry
     name: row.track_name,
     length: row.track_length,
     url: row.track_url,
-    progressUnit: row.track_progress_unit
+    progressUnit: row.track_progress_unit,
+    lastUsed: row.track_last_used ?? null,
   } : null;
 
   const workout: any = {
@@ -139,7 +140,8 @@ export const getAllDailyEntries = (): DailyEntry[] => {
       rt.name as track_name,
       rt.length as track_length,
       rt.url as track_url,
-      rt.progress_unit as track_progress_unit
+      rt.progress_unit as track_progress_unit,
+      rt.last_used as track_last_used
     FROM daily_entries de
     LEFT JOIN running_tracks rt ON de.track_id = rt.id
     ORDER BY de.date DESC
@@ -179,7 +181,8 @@ export const getDailyEntryByDate = (date: string): DailyEntry | null => {
       rt.name as track_name,
       rt.length as track_length,
       rt.url as track_url,
-      rt.progress_unit as track_progress_unit
+      rt.progress_unit as track_progress_unit,
+      rt.last_used as track_last_used
     FROM daily_entries de
     LEFT JOIN running_tracks rt ON de.track_id = rt.id
     WHERE de.date = ?
@@ -335,7 +338,8 @@ export const getWeekSummary = (week: string): DailyEntry[] | null => {
       rt.name as track_name,
       rt.length as track_length,
       rt.url as track_url,
-      rt.progress_unit as track_progress_unit
+      rt.progress_unit as track_progress_unit,
+      rt.last_used as track_last_used
     FROM daily_entries de
     LEFT JOIN running_tracks rt ON de.track_id = rt.id
     WHERE de.week = ?

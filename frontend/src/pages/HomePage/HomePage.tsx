@@ -133,6 +133,7 @@ export const HomePage = () => {
   // Form for new entry
   const showFields = schedule === 'regular' || schedule === 'adhoc';
   const canSave = schedule !== null && (schedule === 'void' || !!trackId);
+  const selectedTrack = tracks.find((t) => t.id === trackId) ?? null;
 
   return (
     <Layout>
@@ -181,6 +182,15 @@ export const HomePage = () => {
                   <option key={t.id} value={t.id}>{t.name}</option>
                 ))}
               </select>
+              {selectedTrack && (
+                <div className={styles.trackInfo}>
+                  <span>{selectedTrack.length} {selectedTrack.progressUnit}</span>
+                  {selectedTrack.lastUsed && (
+                    <span>last run {selectedTrack.lastUsed}</span>
+                  )}
+                  <a href={selectedTrack.url} target="_blank" rel="noopener noreferrer" className={styles.trackInfoLink}>map</a>
+                </div>
+              )}
             </div>
 
             <div className={styles.field}>

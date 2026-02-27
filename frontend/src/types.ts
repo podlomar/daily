@@ -6,6 +6,7 @@ export interface Track {
   length: number;
   url: string;
   progressUnit: 'km' | 'flight' | 'pole';
+  lastUsed: string | null;
 }
 
 export interface Running {

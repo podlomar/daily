@@ -8,6 +8,7 @@ export const ZTrack = z.object({
   length: z.number().meta({ description: 'Track distance' }),
   url: z.url(),
   progressUnit: z.enum(['km', 'flight', 'pole']),
+  lastUsed: z.string().nullable(),
 }).meta({ id: 'Track' });
 
 export type Track = z.infer<typeof ZTrack>;
@@ -26,7 +27,8 @@ const rowToTrack = (row: any): Track => ({
   name: row.name,
   length: row.length,
   url: row.url,
-  progressUnit: row.progress_unit
+  progressUnit: row.progress_unit,
+  lastUsed: row.last_used ?? null,
 });
 
 export const getAllTracks = (): Track[] => {
