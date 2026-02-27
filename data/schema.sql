@@ -4,7 +4,8 @@ CREATE TABLE IF NOT EXISTS running_tracks (
   name TEXT NOT NULL UNIQUE,
   length REAL NOT NULL,
   url TEXT NOT NULL,
-  progress_unit TEXT CHECK(progress_unit IN ('km', 'flight', 'pole')) NOT NULL
+  progress_unit TEXT CHECK(progress_unit IN ('km', 'flight', 'pole')) NOT NULL,
+  last_used DATE
 );
 
 -- Main daily entries table

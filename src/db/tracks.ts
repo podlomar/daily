@@ -30,8 +30,17 @@ const rowToTrack = (row: any): Track => ({
 });
 
 export const getAllTracks = (): Track[] => {
-  const stmt = db.prepare('SELECT * FROM running_tracks');
+  const stmt = db.prepare(
+    'SELECT * FROM running_tracks ORDER BY last_used IS NULL, last_used DESC'
+  );
   return stmt.all().map(rowToTrack);
+};
+
+export const updateTrackLastUsed = (trackId: string, date: string): void => {
+  const stmt = db.prepare(
+    'UPDATE running_tracks SET last_used = ? WHERE id = ?'
+  );
+  stmt.run(date, trackId);
 };
 
 export const getTrackById = (id: string): Track | null => {

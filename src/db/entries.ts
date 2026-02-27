@@ -1,6 +1,6 @@
 import * as z from 'zod';
 import { db } from './connection.js';
-import { getTrackById, ZRunning } from './tracks.js';
+import { getTrackById, updateTrackLastUsed, ZRunning } from './tracks.js';
 import { createWorkoutResults, validateWorkout, ZWorkout, type WorkoutInput, type WorkoutResult } from './workouts.js';
 import { ZSchedule } from './schema.js';
 import dayjs from 'dayjs';
@@ -249,6 +249,10 @@ export const createDailyEntry = (input: DailyEntryInput): Result<string[], strin
     );
 
     report.push(`Daily entry for ${date} created successfully`);
+
+    if (running.trackId !== undefined) {
+      updateTrackLastUsed(running.trackId, date);
+    }
 
     if (
       input.workout !== undefined
