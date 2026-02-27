@@ -16,3 +16,6 @@ rsync -avz package.json package-lock.json "$REMOTE/"
 
 # Install production dependencies on server
 ssh "$HOST" "bash -lc 'cd /var/www/daily.podlomar.me && npm install --omit=dev'"
+
+# Restart server
+ssh "$HOST" "bash -lc 'sudo systemctl restart daily'"
