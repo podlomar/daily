@@ -54,3 +54,11 @@ CREATE TABLE IF NOT EXISTS workout_results (
 CREATE TABLE IF NOT EXISTS exercises (
   name TEXT PRIMARY KEY
 );
+
+-- Todo items
+CREATE TABLE IF NOT EXISTS todos (
+  id TEXT PRIMARY KEY,
+  text TEXT NOT NULL,
+  created_at DATE NOT NULL,
+  done INTEGER NOT NULL DEFAULT 0
+);

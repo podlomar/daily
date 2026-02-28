@@ -5,7 +5,7 @@ import cookieParser from 'cookie-parser';
 import dayjs from 'dayjs';
 import yaml from 'js-yaml';
 import type { DailyEntryInput } from './db/entries.js';
-import { getAllTracks, getTrackById, getAllDailyEntries, buildDiary, getDailyEntryByDate, updateDailyEntry, getWeekSummary, createDailyEntry, createTrack, getWorkoutResultsByDate, collectStats, workoutsSummary, getExercises } from './db/index.js';
+import { getAllTracks, getTrackById, getAllDailyEntries, buildDiary, getDailyEntryByDate, updateDailyEntry, getWeekSummary, createDailyEntry, createTrack, getWorkoutResultsByDate, collectStats, workoutsSummary, getExercises, getAllTodos, createTodo, ZTodoInput } from './db/index.js';
 import { parseDailyEntryYaml, parseDailyEntryJson } from './parsers/index.js';
 import { getMeals } from './food/meals.js';
 import { Result } from 'monadix/result';
@@ -281,6 +281,29 @@ router.get('/exercises', (req: Request, res: Response) => {
     res.status(200).json(envelope(req, exercises));
   } catch (error) {
     res.status(500).json({ error: 'Failed to retrieve exercises' });
+  }
+});
+
+router.get('/todos', (req: Request, res: Response) => {
+  try {
+    const todos = getAllTodos();
+    res.status(200).json(envelope(req, todos));
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to retrieve todos' });
+  }
+});
+
+router.post('/todos', (req: Request, res: Response) => {
+  const parsed = ZTodoInput.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: 'Invalid todo input', details: parsed.error.issues });
+  }
+
+  try {
+    const todo = createTodo(parsed.data);
+    res.status(201).json(envelope(req, todo));
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to create todo' });
   }
 });
 
