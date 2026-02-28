@@ -3,6 +3,7 @@ import { LoginPage } from './pages/LoginPage/LoginPage';
 import { HomePage } from './pages/HomePage/HomePage';
 import { DashboardPage } from './pages/DashboardPage/DashboardPage';
 import { EntryPage } from './pages/EntryPage/EntryPage';
+import { TodosPage } from './pages/TodosPage/TodosPage';
 
 const hasToken = (): boolean => {
   return document.cookie.split(';').some((c) => c.trim().startsWith('token='));
@@ -40,6 +41,14 @@ export const App = () => (
         element={
           <RequireAuth>
             <EntryPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/todos"
+        element={
+          <RequireAuth>
+            <TodosPage />
           </RequireAuth>
         }
       />

@@ -56,6 +56,13 @@ export interface Meal {
   ingredients: { id: string; name: string; quantity: string; kcal: number }[];
 }
 
+export interface Todo {
+  id: string;
+  text: string;
+  createdAt: string;
+  done: boolean;
+}
+
 export interface ApiEnvelope<T> {
   links: { self: string; previous?: string; next?: string };
   result: T;

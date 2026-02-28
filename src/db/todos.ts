@@ -31,6 +31,18 @@ export const getAllTodos = (): Todo[] => {
   return stmt.all().map(rowToTodo);
 };
 
+export const ZTodoPatch = z.strictObject({
+  done: z.boolean(),
+}).meta({ id: 'TodoPatch' });
+
+export type TodoPatch = z.infer<typeof ZTodoPatch>;
+
+export const updateTodo = (id: string, patch: TodoPatch): boolean => {
+  const stmt = db.prepare('UPDATE todos SET done = ? WHERE id = ?');
+  const info = stmt.run(patch.done ? 1 : 0, id);
+  return info.changes > 0;
+};
+
 export const createTodo = (input: TodoInput): Todo => {
   const id = nanoid(6);
   const createdAt = input.createdAt ?? dayjs().format('YYYY-MM-DD');

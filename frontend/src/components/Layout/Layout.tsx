@@ -23,6 +23,7 @@ export const Layout = ({ children }: LayoutProps) => {
         </h1>
         <nav className={styles.nav}>
           <Link to="/dashboard" className={styles.navLink}>history</Link>
+          <Link to="/todos" className={styles.navLink}>todos</Link>
           <button className={styles.logout} onClick={handleLogout}>logout</button>
         </nav>
       </header>

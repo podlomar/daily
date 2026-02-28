@@ -5,7 +5,7 @@ import cookieParser from 'cookie-parser';
 import dayjs from 'dayjs';
 import yaml from 'js-yaml';
 import type { DailyEntryInput } from './db/entries.js';
-import { getAllTracks, getTrackById, getAllDailyEntries, buildDiary, getDailyEntryByDate, updateDailyEntry, getWeekSummary, createDailyEntry, createTrack, getWorkoutResultsByDate, collectStats, workoutsSummary, getExercises, getAllTodos, createTodo, ZTodoInput } from './db/index.js';
+import { getAllTracks, getTrackById, getAllDailyEntries, buildDiary, getDailyEntryByDate, updateDailyEntry, getWeekSummary, createDailyEntry, createTrack, getWorkoutResultsByDate, collectStats, workoutsSummary, getExercises, getAllTodos, createTodo, updateTodo, ZTodoInput, ZTodoPatch } from './db/index.js';
 import { parseDailyEntryYaml, parseDailyEntryJson } from './parsers/index.js';
 import { getMeals } from './food/meals.js';
 import { Result } from 'monadix/result';
@@ -304,6 +304,24 @@ router.post('/todos', (req: Request, res: Response) => {
     res.status(201).json(envelope(req, todo));
   } catch (error) {
     res.status(500).json({ error: 'Failed to create todo' });
+  }
+});
+
+router.patch('/todos/:id', (req: Request, res: Response) => {
+  const parsed = ZTodoPatch.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: 'Invalid todo update', details: parsed.error.issues });
+  }
+
+  try {
+    const success = updateTodo(req.params.id, parsed.data);
+    if (success) {
+      res.status(200).json(envelope(req, { message: 'Todo updated' }));
+    } else {
+      res.status(404).json({ error: 'Todo not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update todo' });
   }
 });
 

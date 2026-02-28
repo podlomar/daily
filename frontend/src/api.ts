@@ -1,4 +1,4 @@
-import type { ApiEnvelope, DailyEntry, Stats, Meal, Track } from './types';
+import type { ApiEnvelope, DailyEntry, Stats, Meal, Track, Todo } from './types';
 
 class UnauthorizedError extends Error {
   constructor() {
@@ -41,6 +41,34 @@ export const api = {
   },
   updateEntry: async (date: string, data: object): Promise<void> => {
     const res = await fetch(`/api/entries/${date}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify(data),
+    });
+    if (res.status === 401) throw new UnauthorizedError();
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error ?? `API error: ${res.status}`);
+    }
+  },
+  getTodos: () => request<Todo[]>('/api/todos'),
+  createTodo: async (data: { text: string; createdAt?: string }): Promise<ApiEnvelope<Todo>> => {
+    const res = await fetch('/api/todos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify(data),
+    });
+    if (res.status === 401) throw new UnauthorizedError();
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error ?? `API error: ${res.status}`);
+    }
+    return res.json();
+  },
+  updateTodo: async (id: string, data: { done: boolean }): Promise<void> => {
+    const res = await fetch(`/api/todos/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'same-origin',
