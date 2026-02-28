@@ -43,7 +43,7 @@ export const updateTodo = (id: string, patch: TodoPatch): boolean => {
 };
 
 export const createTodo = (input: TodoInput): Todo => {
-  const id = nanoid(6);
+  const id = nanoid(8);
   const createdAt = dayjs().format('YYYY-MM-DD HH:mm:ss');
 
   const stmt = db.prepare('INSERT INTO todos (id, text, created_at, done) VALUES (?, ?, ?, 0)');

@@ -9,7 +9,7 @@ describe('Todos API', () => {
       assert.equal(res.status, 201);
       assert.equal(res.body.links.self, '/api/todos');
       assert.ok(typeof res.body.result.id === 'string');
-      assert.equal(res.body.result.id.length, 6);
+      assert.equal(res.body.result.id.length, 8);
       assert.equal(res.body.result.text, 'Buy groceries');
       assert.match(res.body.result.createdAt, /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
       assert.equal(res.body.result.done, false);
