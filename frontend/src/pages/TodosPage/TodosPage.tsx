@@ -97,7 +97,7 @@ export const TodosPage = () => {
                 ○
               </button>
               <span className={styles.text}>{todo.text}</span>
-              <span className={styles.date}>{todo.createdAt}</span>
+              <span className={styles.date}>{todo.createdAt.slice(0, 10)}</span>
             </li>
           ))}
         </ul>
@@ -117,7 +117,7 @@ export const TodosPage = () => {
                   ●
                 </button>
                 <span className={`${styles.text} ${styles.textDone}`}>{todo.text}</span>
-                <span className={styles.date}>{todo.createdAt}</span>
+                <span className={styles.date}>{todo.createdAt.slice(0, 10)}</span>
               </li>
             ))}
           </ul>

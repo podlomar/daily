@@ -53,7 +53,7 @@ export const api = {
     }
   },
   getTodos: () => request<Todo[]>('/api/todos'),
-  createTodo: async (data: { text: string; createdAt?: string }): Promise<ApiEnvelope<Todo>> => {
+  createTodo: async (data: { text: string }): Promise<ApiEnvelope<Todo>> => {
     const res = await fetch('/api/todos', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

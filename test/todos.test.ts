@@ -11,14 +11,8 @@ describe('Todos API', () => {
       assert.ok(typeof res.body.result.id === 'string');
       assert.equal(res.body.result.id.length, 6);
       assert.equal(res.body.result.text, 'Buy groceries');
-      assert.match(res.body.result.createdAt, /^\d{4}-\d{2}-\d{2}$/);
+      assert.match(res.body.result.createdAt, /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
       assert.equal(res.body.result.done, false);
-    });
-
-    it('accepts a custom createdAt date', async () => {
-      const res = await request.post('/api/todos').send({ text: 'Old task', createdAt: '2025-01-15' });
-      assert.equal(res.status, 201);
-      assert.equal(res.body.result.createdAt, '2025-01-15');
     });
 
     it('returns 400 for missing text', async () => {
@@ -38,7 +32,7 @@ describe('Todos API', () => {
       assert.equal(res.status, 200);
       assert.equal(res.body.links.self, '/api/todos');
       assert.ok(Array.isArray(res.body.result));
-      assert.ok(res.body.result.length >= 2);
+      assert.ok(res.body.result.length >= 1);
 
       const todo = res.body.result.find((t: any) => t.text === 'Buy groceries');
       assert.ok(todo);

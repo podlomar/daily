@@ -6,7 +6,7 @@ import dayjs from 'dayjs';
 export const ZTodo = z.object({
   id: z.string(),
   text: z.string(),
-  createdAt: z.string().meta({ format: 'date' }),
+  createdAt: z.string().meta({ format: 'date-time' }),
   done: z.boolean(),
 }).meta({ id: 'Todo' });
 
@@ -14,7 +14,6 @@ export type Todo = z.infer<typeof ZTodo>;
 
 export const ZTodoInput = z.strictObject({
   text: z.string().min(1),
-  createdAt: z.iso.date().optional().meta({ description: 'Defaults to today if omitted' }),
 }).meta({ id: 'TodoInput' });
 
 export type TodoInput = z.infer<typeof ZTodoInput>;
@@ -45,7 +44,7 @@ export const updateTodo = (id: string, patch: TodoPatch): boolean => {
 
 export const createTodo = (input: TodoInput): Todo => {
   const id = nanoid(6);
-  const createdAt = input.createdAt ?? dayjs().format('YYYY-MM-DD');
+  const createdAt = dayjs().format('YYYY-MM-DD HH:mm:ss');
 
   const stmt = db.prepare('INSERT INTO todos (id, text, created_at, done) VALUES (?, ?, ?, 0)');
   stmt.run(id, input.text, createdAt);
