@@ -30,6 +30,12 @@ export const ZDailyEntryUpdate = z.object({
   stretching: z.string().nullable().optional(),
   stairs: z.string().nullable().optional(),
   diary: z.string().nullable().optional(),
+  running: z.object({
+    schedule: ZSchedule,
+    trackId: z.string().optional(),
+    progress: z.string().optional(),
+    performance: z.number().int().min(0).max(4).optional(),
+  }).optional(),
 }).meta({ id: 'DailyEntryUpdate' });
 
 export type DailyEntryUpdate = z.infer<typeof ZDailyEntryUpdate>;
@@ -298,6 +304,16 @@ export const updateDailyEntry = (date: string, entryUpdate: DailyEntryUpdate): b
   if (entryUpdate.diary !== undefined) {
     updates.push('diary = ?');
     values.push(entryUpdate.diary);
+  }
+  if (entryUpdate.running !== undefined) {
+    updates.push('running_schedule = ?');
+    updates.push('track_id = ?');
+    updates.push('running_progress = ?');
+    updates.push('running_performance = ?');
+    values.push(entryUpdate.running.schedule);
+    values.push(entryUpdate.running.trackId ?? null);
+    values.push(entryUpdate.running.progress ?? null);
+    values.push(entryUpdate.running.performance ?? null);
   }
 
   console.log(`Updating daily entry for ${date} with:`, entryUpdate);
