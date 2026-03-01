@@ -10,7 +10,7 @@ export interface Track {
 }
 
 export interface Running {
-  schedule: Schedule;
+  schedule: Schedule | null;
   track: Track | null;
   progress: string | null;
   performance: number | null;
@@ -23,7 +23,7 @@ export interface WorkoutResult {
 }
 
 export interface Workout {
-  schedule: Schedule;
+  schedule: Schedule | null;
   routine: string | null;
   results: WorkoutResult[];
 }

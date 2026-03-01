@@ -76,13 +76,13 @@ export const DashboardPage = () => {
               <div>
                 <div className={styles.todayLabel}>running</div>
                 <div className={styles.todayValue}>
-                  {today.running.schedule === 'void' ? '\u2014' : today.running.schedule}
+                  {today.running.schedule == null || today.running.schedule === 'void' ? '\u2014' : today.running.schedule}
                 </div>
               </div>
               <div>
                 <div className={styles.todayLabel}>workout</div>
                 <div className={styles.todayValue}>
-                  {today.workout.schedule === 'void' ? '\u2014' : today.workout.schedule}
+                  {today.workout.schedule == null || today.workout.schedule === 'void' ? '\u2014' : today.workout.schedule}
                 </div>
               </div>
               <div>

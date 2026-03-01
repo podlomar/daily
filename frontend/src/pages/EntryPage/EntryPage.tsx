@@ -6,7 +6,7 @@ import { Layout } from '../../components/Layout/Layout';
 import { EntryNav } from '../../components/EntryNav/EntryNav';
 import styles from './EntryPage.module.css';
 
-const scheduleClass = (schedule: Schedule): string => styles[schedule] ?? '';
+const scheduleClass = (schedule: Schedule | null): string => schedule ? styles[schedule] ?? '' : '';
 
 const Performance = ({ value }: { value: number | null }) => {
   if (value == null) return <span className={styles.value}>{'\u2014'}</span>;
@@ -87,7 +87,7 @@ export const EntryPage = () => {
           <div className={styles.field}>
             <span className={styles.label}>schedule</span>
             <span className={`${styles.value} ${scheduleClass(entry.running.schedule)}`}>
-              {entry.running.schedule}
+              {entry.running.schedule ?? '\u2014'}
             </span>
           </div>
           {entry.running.track && (
@@ -125,7 +125,7 @@ export const EntryPage = () => {
           <div className={styles.field}>
             <span className={styles.label}>schedule</span>
             <span className={`${styles.value} ${scheduleClass(entry.workout.schedule)}`}>
-              {entry.workout.schedule}
+              {entry.workout.schedule ?? '\u2014'}
             </span>
           </div>
           {entry.workout.routine && (

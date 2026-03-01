@@ -17,6 +17,7 @@ export const HomePage = () => {
   const [todayEntry, setTodayEntry] = useState<DailyEntry | null | 'none'>(null);
 
   const [date, setDate] = useState(today());
+  const [weight, setWeight] = useState('');
   const [schedule, setSchedule] = useState<Schedule | null>(null);
   const [trackId, setTrackId] = useState('');
   const [progress, setProgress] = useState('');
@@ -60,8 +61,9 @@ export const HomePage = () => {
   };
 
   const handleSave = async () => {
-    if (!schedule) return;
-    if (schedule !== 'void' && !trackId) {
+    const hasWeight = weight !== '';
+    if (!schedule && !hasWeight) return;
+    if (schedule !== null && schedule !== 'void' && !trackId) {
       setError('Please select a track');
       return;
     }
@@ -69,13 +71,18 @@ export const HomePage = () => {
     setSaving(true);
     setError('');
 
-    const running: Record<string, unknown> = { schedule };
-    if (schedule !== 'void' && trackId) running.trackId = trackId;
-    if (progress.trim()) running.progress = progress.trim();
-    if (performance != null) running.performance = performance;
+    const body: Record<string, unknown> = { date };
+    if (hasWeight) body.weight = parseFloat(weight);
+    if (schedule !== null) {
+      const running: Record<string, unknown> = { schedule };
+      if (schedule !== 'void' && trackId) running.trackId = trackId;
+      if (progress.trim()) running.progress = progress.trim();
+      if (performance != null) running.performance = performance;
+      body.running = running;
+    }
 
     try {
-      await api.createEntry({ date, running, workout: { schedule: 'void' } });
+      await api.createEntry(body);
       navigate(`/entry/${date}`);
     } catch (err) {
       if (err instanceof UnauthorizedError) {
@@ -99,8 +106,8 @@ export const HomePage = () => {
   if (todayEntry !== 'none') {
     const entry = todayEntry;
     const run = entry.running;
-    const runSummary = run.schedule === 'void'
-      ? 'rest'
+    const runSummary = run.schedule == null || run.schedule === 'void'
+      ? '\u2014'
       : [run.schedule, run.track?.name, run.progress].filter(Boolean).join(' · ');
 
     return (
@@ -131,8 +138,9 @@ export const HomePage = () => {
   }
 
   // Form for new entry
+  const hasWeight = weight !== '';
   const showFields = schedule === 'regular' || schedule === 'adhoc';
-  const canSave = schedule !== null && (schedule === 'void' || !!trackId);
+  const canSave = (hasWeight || schedule !== null) && (schedule === null || schedule === 'void' || !!trackId);
   const selectedTrack = tracks.find((t) => t.id === trackId) ?? null;
 
   return (
@@ -147,6 +155,18 @@ export const HomePage = () => {
       </div>
 
       <div className={styles.form}>
+        <div className={styles.field}>
+          <label className={styles.label}>weight (kg)</label>
+          <input
+            className={styles.input}
+            type="number"
+            step="0.1"
+            value={weight}
+            onChange={(e) => setWeight(e.target.value)}
+            placeholder="75.5"
+          />
+        </div>
+
         <div className={styles.scheduleRow}>
           <button
             className={`${styles.scheduleBtn} ${styles.scheduleBtnVoid} ${schedule === 'void' ? styles.active : ''}`}

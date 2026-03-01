@@ -6,12 +6,12 @@ interface EntryRowProps {
   entry: DailyEntry;
 }
 
-const scheduleClass = (schedule: Schedule): string => {
-  return styles[schedule] ?? '';
+const scheduleClass = (schedule: Schedule | null): string => {
+  return schedule ? styles[schedule] ?? '' : '';
 };
 
-const formatSchedule = (label: string, schedule: Schedule): string => {
-  if (schedule === 'void') return '\u2014';
+const formatSchedule = (label: string, schedule: Schedule | null): string => {
+  if (schedule == null || schedule === 'void') return '\u2014';
   return `${label}: ${schedule}`;
 };
 
