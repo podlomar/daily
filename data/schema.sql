@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS daily_entries (
   day STRING CHECK(day IN ('mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun')) NOT NULL,
 
   -- Running data
-  running_schedule TEXT NOT NULL CHECK(running_schedule IN ('regular', 'adhoc', 'legacy', 'void')),
+  running_schedule TEXT CHECK(running_schedule IN ('regular', 'adhoc', 'legacy', 'void')),
   track_id TEXT,
   running_progress TEXT,
   running_performance INTEGER CHECK(running_performance >= 0 AND running_performance <= 5),

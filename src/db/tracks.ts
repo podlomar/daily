@@ -14,7 +14,7 @@ export const ZTrack = z.object({
 export type Track = z.infer<typeof ZTrack>;
 
 export const ZRunning = z.object({
-  schedule: ZSchedule,
+  schedule: ZSchedule.nullable(),
   track: ZTrack.nullable(),
   progress: z.string().nullable(),
   performance: z.int().min(0).max(5).nullable(),

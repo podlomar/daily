@@ -1,7 +1,7 @@
 import * as z from 'zod';
 import { db } from './connection.js';
 import { getTrackById, updateTrackLastUsed, ZRunning } from './tracks.js';
-import { createWorkoutResults, validateWorkout, ZWorkout, type WorkoutInput, type WorkoutResult } from './workouts.js';
+import { createWorkoutResults, validateWorkout, ZWorkout, type WorkoutResult } from './workouts.js';
 import { ZSchedule } from './schema.js';
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek.js';
@@ -214,19 +214,19 @@ export const createDailyEntry = (input: DailyEntryInput): Result<string[], strin
   const week = `${dayjs(date).isoWeekYear()}-${String(dayjs(date).isoWeek()).padStart(2, '0')}`;
   const month = dayjs(date).format('MMM').toLowerCase();
   const day = dayjs(date).format('ddd').toLowerCase();
-  const running: RunningInput = input.running ?? { schedule: 'void' };
 
-  if (running.trackId !== undefined) {
-    const track = getTrackById(running.trackId);
+  if (input.running?.trackId !== undefined) {
+    const track = getTrackById(input.running.trackId);
     if (!track) {
-      return Result.fail([`Running track with ID ${running.trackId} does not exist`]);
+      return Result.fail([`Running track with ID ${input.running.trackId} does not exist`]);
     }
   }
 
-  const workout: WorkoutInput = input.workout ?? { schedule: 'void' };
-  const workoutValidation = validateWorkout(workout);
-  if (workoutValidation.isFail()) {
-    return Result.fail(workoutValidation.err());
+  if (input.workout !== undefined) {
+    const workoutValidation = validateWorkout(input.workout);
+    if (workoutValidation.isFail()) {
+      return Result.fail(workoutValidation.err());
+    }
   }
 
   const report: string[] = [];
@@ -238,12 +238,12 @@ export const createDailyEntry = (input: DailyEntryInput): Result<string[], strin
       dayjs(date).year(),
       month,
       day,
-      running.trackId,
-      running.schedule,
-      running.progress,
-      running.performance,
-      input.workout?.schedule ?? 'adhoc',
-      input.workout?.routine ?? 'rest',
+      input.running?.trackId ?? null,
+      input.running?.schedule ?? null,
+      input.running?.progress ?? null,
+      input.running?.performance ?? null,
+      input.workout?.schedule ?? null,
+      input.workout?.routine ?? null,
       input.weight ?? null,
       input.lastMeal ?? null,
       input.stretching ?? null,
@@ -253,8 +253,8 @@ export const createDailyEntry = (input: DailyEntryInput): Result<string[], strin
 
     report.push(`Daily entry for ${date} created successfully`);
 
-    if (running.trackId !== undefined) {
-      updateTrackLastUsed(running.trackId, date);
+    if (input.running?.trackId !== undefined) {
+      updateTrackLastUsed(input.running.trackId, date);
     }
 
     if (

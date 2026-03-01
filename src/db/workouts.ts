@@ -12,7 +12,7 @@ export const ZWorkoutResult = z.object({
 export type WorkoutResult = z.infer<typeof ZWorkoutResult>;
 
 export const ZWorkout = z.object({
-  schedule: ZSchedule,
+  schedule: ZSchedule.nullable(),
   routine: z.string().optional(),
   results: z.array(ZWorkoutResult).optional(),
 }).meta({ id: 'Workout' });
