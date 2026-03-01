@@ -9,7 +9,8 @@
     "start": "node dist/index.js",
     "dev": "tsc -w & nodemon dist/index.js",
     "test": "DB_PATH=:memory: mocha",
-    "deploy": "npm run build && ./deploy/deploy.sh"
+    "deploy": "npm run build && ./deploy/deploy.sh",
+    "kill": "pkill -f 'node dist/index.js'"
   },
   "keywords": [],
   "author": "",
