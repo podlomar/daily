@@ -5,17 +5,47 @@
 }
 
 .error {
+  font-size: var(--font-size-sm);
   color: var(--danger);
-  text-align: center;
-  padding: var(--space-xl);
+  font-family: var(--font-mono);
 }
 
+/* Date row (for creation form) */
+.dateRow {
+  margin-bottom: var(--space-xl);
+}
+
+.dateInput {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0;
+}
+
+.dateInput:focus {
+  outline: none;
+  color: var(--text-primary);
+}
+
+/* Sections */
 .section {
   background: var(--bg-secondary);
   border: var(--border);
   border-radius: var(--radius);
   padding: var(--space-md);
   margin-bottom: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .sectionTitle {
@@ -23,9 +53,23 @@
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: var(--space-sm);
 }
 
+.editBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.editBtn:hover {
+  color: var(--text-secondary);
+}
+
+/* Grid for read-only fields */
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
@@ -35,12 +79,13 @@
 .field {
   display: flex;
   flex-direction: column;
+  gap: var(--space-xs);
 }
 
 .label {
   font-size: var(--font-size-sm);
   color: var(--text-muted);
-  margin-bottom: var(--space-xs);
+  font-family: var(--font-mono);
 }
 
 .value {
@@ -48,6 +93,7 @@
   font-size: var(--font-size-base);
 }
 
+/* Schedule colors for read-only display */
 .regular {
   color: var(--accent);
 }
@@ -64,6 +110,122 @@
   color: var(--text-secondary);
 }
 
+/* Schedule buttons */
+.scheduleRow {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.scheduleBtn {
+  flex: 1;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg-secondary);
+  border: var(--border);
+  border-radius: var(--radius);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  transition: border-color 0.1s, color 0.1s;
+}
+
+.scheduleBtn:hover {
+  color: var(--text-primary);
+  border-color: var(--text-secondary);
+}
+
+.scheduleBtnVoid.active {
+  border-color: var(--text-muted);
+  color: var(--text-secondary);
+  background: var(--bg-tertiary);
+}
+
+.scheduleBtnRegular.active {
+  border-color: var(--success);
+  color: var(--success);
+  background: var(--bg-tertiary);
+}
+
+.scheduleBtnAdhoc.active {
+  border-color: var(--warning);
+  color: var(--warning);
+  background: var(--bg-tertiary);
+}
+
+/* Form fields */
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.select,
+.input {
+  background: var(--bg-tertiary);
+  border: var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-sm) var(--space-md);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.select:focus,
+.input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* Track info */
+.trackInfo {
+  display: flex;
+  gap: var(--space-md);
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  margin-top: var(--space-xs);
+}
+
+.trackInfoLink {
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.trackInfoLink:hover {
+  color: var(--text-secondary);
+}
+
+/* Performance dots (input) */
+.dots {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.dot {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 1.25rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.dotFilled {
+  color: var(--accent);
+}
+
+.dotEmpty {
+  color: var(--text-muted);
+}
+
+.dotEmpty:hover {
+  color: var(--text-secondary);
+}
+
+/* Performance dots (read-only display) */
 .performance {
   letter-spacing: 2px;
 }
@@ -76,6 +238,82 @@
   color: var(--success);
 }
 
+/* Edit actions row */
+.editActions {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+}
+
+.cancelBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.cancelBtn:hover {
+  color: var(--text-secondary);
+}
+
+/* Time row (last meal edit) */
+.timeRow {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+}
+
+.timeRow .input {
+  width: auto;
+  flex: 1;
+}
+
+.nowBtn {
+  background: none;
+  border: var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-xs) var(--space-sm);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.nowBtn:hover {
+  color: var(--text-primary);
+  border-color: var(--text-secondary);
+}
+
+/* Save buttons */
+.saveBtn {
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius);
+  color: #0d1117;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  align-self: flex-start;
+}
+
+.saveBtn:hover {
+  opacity: 0.9;
+}
+
+.saveBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Workout table */
 .table {
   width: 100%;
   border-collapse: collapse;
@@ -96,6 +334,7 @@
   border-bottom: 1px solid var(--border-color);
 }
 
+/* Diary */
 .diary {
   font-family: var(--font-sans);
   font-size: var(--font-size-base);
