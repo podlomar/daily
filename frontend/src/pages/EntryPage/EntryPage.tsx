@@ -279,7 +279,7 @@ export const EntryPage = () => {
                 </select>
                 {selectedCreateTrack && (
                   <div className={styles.trackInfo}>
-                    <span>{selectedCreateTrack.length} {selectedCreateTrack.progressUnit}</span>
+                    <span>{selectedCreateTrack.length} km</span>
                     {selectedCreateTrack.lastUsed && (
                       <span>last run {selectedCreateTrack.lastUsed}</span>
                     )}
@@ -387,7 +387,7 @@ export const EntryPage = () => {
                   </select>
                   {selectedRunTrack && (
                     <div className={styles.trackInfo}>
-                      <span>{selectedRunTrack.length} {selectedRunTrack.progressUnit}</span>
+                      <span>{selectedRunTrack.length} km</span>
                       {selectedRunTrack.lastUsed && (
                         <span>last run {selectedRunTrack.lastUsed}</span>
                       )}
@@ -467,7 +467,7 @@ export const EntryPage = () => {
                 <div className={styles.field}>
                   <span className={styles.label}>distance</span>
                   <span className={styles.value}>
-                    {entry.running.track.length} {entry.running.track.progressUnit}
+                    {entry.running.track.length} km
                   </span>
                 </div>
               </>
