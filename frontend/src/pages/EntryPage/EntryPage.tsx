@@ -29,6 +29,8 @@ const scheduleBtnClass = (
   return [styles.scheduleBtn, variant, active ? styles.active : ''].filter(Boolean).join(' ');
 };
 
+const isNumeric = (s: string): boolean => /^\d+(\.\d+)?$/.test(s.trim());
+
 const Performance = ({ value }: { value: number | null }) => {
   if (value == null) return <span className={styles.value}>{'\u2014'}</span>;
   return (
@@ -474,7 +476,13 @@ export const EntryPage = () => {
             )}
             <div className={styles.field}>
               <span className={styles.label}>progress</span>
-              <span className={styles.value}>{entry.running.progress ?? '\u2014'}</span>
+              <span className={styles.value}>
+                {entry.running.progress != null
+                  ? isNumeric(entry.running.progress) && entry.running.track
+                    ? `${entry.running.progress} ${entry.running.track.progressUnit}`
+                    : entry.running.progress
+                  : '\u2014'}
+              </span>
             </div>
             <div className={styles.field}>
               <span className={styles.label}>performance</span>
