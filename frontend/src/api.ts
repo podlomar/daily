@@ -67,6 +67,19 @@ export const api = {
     }
     return res.json();
   },
+  postDiary: async (date: string, text: string): Promise<void> => {
+    const res = await fetch(`/api/entries/${date}/diary`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      credentials: 'same-origin',
+      body: text,
+    });
+    if (res.status === 401) throw new UnauthorizedError();
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error ?? `API error: ${res.status}`);
+    }
+  },
   updateTodo: async (id: string, data: { done: boolean }): Promise<void> => {
     const res = await fetch(`/api/todos/${id}`, {
       method: 'PATCH',

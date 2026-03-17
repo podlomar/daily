@@ -61,6 +61,12 @@ export const EntryPage = () => {
   const [runSaving, setRunSaving] = useState(false);
   const [runError, setRunError] = useState('');
 
+  // Diary edit state
+  const [diaryEditMode, setDiaryEditMode] = useState(false);
+  const [diaryText, setDiaryText] = useState('');
+  const [diarySaving, setDiarySaving] = useState(false);
+  const [diaryError, setDiaryError] = useState('');
+
   // Body edit state
   const [bodyEditMode, setBodyEditMode] = useState(false);
   const [weight, setWeight] = useState('');
@@ -84,6 +90,7 @@ export const EntryPage = () => {
     setRunPerformance(e.running.performance);
     setWeight(e.weight != null ? String(e.weight) : '');
     setEditLastMeal(e.lastMeal ?? '');
+    setDiaryText(e.diary ?? '');
   };
 
   const loadEntry = async (entryDate: string) => {
@@ -180,6 +187,29 @@ export const EntryPage = () => {
     setWeight(entry.weight != null ? String(entry.weight) : '');
     setEditLastMeal(entry.lastMeal ?? '');
     setBodyEditMode(false);
+  };
+
+  const handleSaveDiary = async () => {
+    if (!entry || entry === 'none') return;
+    setDiarySaving(true);
+    setDiaryError('');
+    try {
+      await api.postDiary(entry.date, diaryText);
+      await loadEntry(entry.date);
+      setDiaryEditMode(false);
+    } catch (err) {
+      if (err instanceof UnauthorizedError) navigate('/login');
+      else setDiaryError(err instanceof Error ? err.message : 'Failed to save');
+    } finally {
+      setDiarySaving(false);
+    }
+  };
+
+  const handleCancelDiary = () => {
+    if (!entry || entry === 'none') return;
+    setDiaryText(entry.diary ?? '');
+    setDiaryError('');
+    setDiaryEditMode(false);
   };
 
   const handleCreate = async () => {
@@ -611,13 +641,43 @@ export const EntryPage = () => {
         )}
       </div>
 
-      {/* Diary — read-only */}
-      {entry.diary && (
-        <div className={styles.section}>
+      {/* Diary section */}
+      <div className={styles.section}>
+        <div className={styles.sectionHeader}>
           <div className={styles.sectionTitle}>Diary</div>
-          <div className={styles.diary}>{entry.diary}</div>
+          {!diaryEditMode && (
+            <button className={styles.editBtn} onClick={() => setDiaryEditMode(true)}>edit</button>
+          )}
         </div>
-      )}
+        {diaryEditMode ? (
+          <>
+            <textarea
+              className={styles.textarea}
+              value={diaryText}
+              onChange={(e) => setDiaryText(e.target.value)}
+              rows={6}
+              placeholder="Write your diary entry…"
+            />
+            {diaryError && <div className={styles.error}>{diaryError}</div>}
+            <div className={styles.editActions}>
+              <button
+                className={styles.saveBtn}
+                onClick={handleSaveDiary}
+                disabled={diarySaving}
+              >
+                {diarySaving ? 'saving…' : 'save'}
+              </button>
+              <button className={styles.cancelBtn} onClick={handleCancelDiary}>
+                cancel
+              </button>
+            </div>
+          </>
+        ) : entry.diary ? (
+          <div className={styles.diary}>{entry.diary}</div>
+        ) : (
+          <div className={styles.empty}>no entry</div>
+        )}
+      </div>
     </Layout>
   );
 };
