@@ -20,6 +20,7 @@ const envelope = (req: Request, result: any, links?: Record<string, string>) => 
 });
 
 app.use(express.json());
+app.use(express.text());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use((req: Request, res: Response, next) => {
@@ -215,7 +216,6 @@ router.post('/entries/:date/diary', (req: Request, res: Response) => {
   try {
     const date = req.params.date;
 
-    // Get the diary text from the request body as plain text
     const diaryText = req.body;
     console.log(`Received diary update for ${date}:`, diaryText);
 
