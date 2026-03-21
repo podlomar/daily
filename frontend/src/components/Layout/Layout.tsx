@@ -24,6 +24,7 @@ export const Layout = ({ children }: LayoutProps) => {
         <nav className={styles.nav}>
           <Link to="/dashboard" className={styles.navLink}>history</Link>
           <Link to="/todos" className={styles.navLink}>todos</Link>
+          <Link to="/portrait" className={styles.navLink}>portrait</Link>
           <button className={styles.logout} onClick={handleLogout}>logout</button>
         </nav>
       </header>

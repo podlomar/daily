@@ -42,6 +42,10 @@ module.exports = (env, argv) => ({
         exclude: /\.module\.css$/,
         use: ['style-loader', 'css-loader'],
       },
+      {
+        test: /\.(png|jpe?g|gif|svg|webp)$/i,
+        type: 'asset/resource',
+      },
     ],
   },
   plugins: [
