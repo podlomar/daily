@@ -41,6 +41,8 @@ export interface DailyEntry {
   stretching: string | null;
   stairs: string | null;
   diary: string | null;
+  photoUrl: string | null;
+  photoShareUrl: string | null;
 }
 
 export interface Stats {

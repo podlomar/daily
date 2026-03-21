@@ -64,6 +64,7 @@ export const EntryPage = () => {
   // Diary edit state
   const [diaryEditMode, setDiaryEditMode] = useState(false);
   const [diaryText, setDiaryText] = useState('');
+  const [diaryPhotoUrl, setDiaryPhotoUrl] = useState('');
   const [diarySaving, setDiarySaving] = useState(false);
   const [diaryError, setDiaryError] = useState('');
 
@@ -91,6 +92,7 @@ export const EntryPage = () => {
     setWeight(e.weight != null ? String(e.weight) : '');
     setEditLastMeal(e.lastMeal ?? '');
     setDiaryText(e.diary ?? '');
+    setDiaryPhotoUrl(e.photoUrl ?? '');
   };
 
   const loadEntry = async (entryDate: string) => {
@@ -195,6 +197,7 @@ export const EntryPage = () => {
     setDiaryError('');
     try {
       await api.postDiary(entry.date, diaryText);
+      await api.updateEntry(entry.date, { photoUrl: diaryPhotoUrl.trim() || null });
       await loadEntry(entry.date);
       setDiaryEditMode(false);
     } catch (err) {
@@ -208,6 +211,7 @@ export const EntryPage = () => {
   const handleCancelDiary = () => {
     if (!entry || entry === 'none') return;
     setDiaryText(entry.diary ?? '');
+    setDiaryPhotoUrl(entry.photoUrl ?? '');
     setDiaryError('');
     setDiaryEditMode(false);
   };
@@ -658,6 +662,16 @@ export const EntryPage = () => {
               rows={6}
               placeholder="Write your diary entry…"
             />
+            <div className={styles.field}>
+              <label className={styles.label}>photo url</label>
+              <input
+                className={styles.input}
+                type="url"
+                value={diaryPhotoUrl}
+                onChange={(e) => setDiaryPhotoUrl(e.target.value)}
+                placeholder="https://photos.app.goo.gl/…"
+              />
+            </div>
             {diaryError && <div className={styles.error}>{diaryError}</div>}
             <div className={styles.editActions}>
               <button
@@ -672,10 +686,33 @@ export const EntryPage = () => {
               </button>
             </div>
           </>
-        ) : entry.diary ? (
-          <div className={styles.diary}>{entry.diary}</div>
         ) : (
-          <div className={styles.empty}>no entry</div>
+          <>
+            {entry.diary ? (
+              <div className={styles.diary}>{entry.diary}</div>
+            ) : (
+              <div className={styles.empty}>no entry</div>
+            )}
+            {entry.photoUrl && (
+              <a href={entry.photoShareUrl ?? entry.photoUrl} target="_blank" rel="noopener noreferrer">
+                <img
+                  src={entry.photoUrl.replace(
+                    /(lh3\.googleusercontent\.com\/pw\/[A-Za-z0-9_-]+)(?:=[^?]*)?(\?.*)?$/,
+                    '$1=w900$2'
+                  )}
+                  alt="diary photo"
+                  className={styles.diaryPhoto}
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    (e.currentTarget.nextSibling as HTMLElement).style.display = 'inline';
+                  }}
+                />
+                <span className={styles.photoLink} style={{ display: 'none' }}>
+                  view photo ↗
+                </span>
+              </a>
+            )}
+          </>
         )}
       </div>
     </Layout>

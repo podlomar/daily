@@ -360,6 +360,19 @@
   color: var(--text-muted);
 }
 
+.photoLink {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.diaryPhoto {
+  display: block;
+  max-width: 100%;
+  border-radius: var(--radius);
+  margin-top: var(--space-sm);
+}
+
 .diary {
   font-family: var(--font-sans);
   font-size: var(--font-size-base);

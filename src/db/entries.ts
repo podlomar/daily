@@ -20,6 +20,8 @@ export const ZDailyEntry = z.object({
   stretching: z.string().nullable().optional(),
   stairs: z.string().nullable().optional(),
   diary: z.string().nullable().optional(),
+  photoUrl: z.string().nullable().optional(),
+  photoShareUrl: z.string().nullable().optional(),
 }).meta({ id: 'DailyEntry' });
 
 export type DailyEntry = z.infer<typeof ZDailyEntry>;
@@ -30,6 +32,8 @@ export const ZDailyEntryUpdate = z.object({
   stretching: z.string().nullable().optional(),
   stairs: z.string().nullable().optional(),
   diary: z.string().nullable().optional(),
+  photoUrl: z.string().nullable().optional(),
+  photoShareUrl: z.string().nullable().optional(),
   running: z.object({
     schedule: ZSchedule,
     trackId: z.string().optional(),
@@ -64,6 +68,7 @@ export const ZDailyEntryInput = z.strictObject({
   stretching: z.string().nullable().optional(),
   stairs: z.string().nullable().optional(),
   diary: z.string().nullable().optional(),
+  photoUrl: z.string().nullable().optional(),
 }).meta({ id: 'DailyEntryInput' });
 
 export type DailyEntryInput = z.infer<typeof ZDailyEntryInput>;
@@ -78,6 +83,7 @@ export const ZDailyYamlInput = z.strictObject({
   stretching: z.string().nullable().optional(),
   stairs: z.string().nullable().optional(),
   diary: z.string().nullable().optional(),
+  photoUrl: z.string().nullable().optional(),
 }).meta({ id: 'DailyYamlInput' });
 
 export type DailyYamlInput = z.infer<typeof ZDailyYamlInput>;
@@ -134,7 +140,9 @@ const rowToDailyEntry = (row: any, workoutResults?: WorkoutResult[]): DailyEntry
     lastMeal: row.last_meal,
     stretching: row.stretching,
     stairs: row.stairs,
-    diary: row.diary
+    diary: row.diary,
+    photoUrl: row.photo_url ?? null,
+    photoShareUrl: row.photo_share_url ?? null,
   };
 };
 
@@ -212,8 +220,8 @@ export const createDailyEntry = (input: DailyEntryInput): Result<string[], strin
   const stmt = db.prepare(`
     INSERT INTO daily_entries
     (date, week, year, month, day, track_id, running_schedule, running_progress, running_performance,
-     workout_schedule, workout_routine, weight, last_meal, stretching, stairs, diary)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+     workout_schedule, workout_routine, weight, last_meal, stretching, stairs, diary, photo_url)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   const date = input.date ?? dayjs().format('YYYY-MM-DD');
@@ -254,7 +262,8 @@ export const createDailyEntry = (input: DailyEntryInput): Result<string[], strin
       input.lastMeal ?? null,
       input.stretching ?? null,
       input.stairs ?? null,
-      input.diary ?? null
+      input.diary ?? null,
+      input.photoUrl ?? null,
     );
 
     report.push(`Daily entry for ${date} created successfully`);
@@ -304,6 +313,14 @@ export const updateDailyEntry = (date: string, entryUpdate: DailyEntryUpdate): b
   if (entryUpdate.diary !== undefined) {
     updates.push('diary = ?');
     values.push(entryUpdate.diary);
+  }
+  if (entryUpdate.photoUrl !== undefined) {
+    updates.push('photo_url = ?');
+    values.push(entryUpdate.photoUrl);
+  }
+  if (entryUpdate.photoShareUrl !== undefined) {
+    updates.push('photo_share_url = ?');
+    values.push(entryUpdate.photoShareUrl);
   }
   if (entryUpdate.running !== undefined) {
     updates.push('running_schedule = ?');

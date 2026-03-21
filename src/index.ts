@@ -10,6 +10,7 @@ import { parseDailyEntryYaml, parseDailyEntryJson } from './parsers/index.js';
 import { getMeals } from './food/meals.js';
 import { Result } from 'monadix/result';
 import { openapiSpec } from './openapi.js';
+import { resolvePhotoUrl } from './photo.js';
 
 const app = express();
 const PORT = process.env.PORT || 4321;
@@ -196,10 +197,17 @@ router.get('/entries/:date', (req: Request, res: Response) => {
   }
 });
 
-router.patch('/entries/:date', (req: Request, res: Response) => {
+router.patch('/entries/:date', async (req: Request, res: Response) => {
   try {
     const date = req.params.date;
     const entryUpdate = req.body;
+
+    if (entryUpdate.photoUrl) {
+      entryUpdate.photoShareUrl = entryUpdate.photoUrl;
+      entryUpdate.photoUrl = await resolvePhotoUrl(entryUpdate.photoUrl);
+    } else if (entryUpdate.photoUrl === null) {
+      entryUpdate.photoShareUrl = null;
+    }
 
     const success = updateDailyEntry(date, entryUpdate);
     if (success) {

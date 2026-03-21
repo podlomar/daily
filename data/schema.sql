@@ -34,6 +34,8 @@ CREATE TABLE IF NOT EXISTS daily_entries (
 
   -- Diary
   diary TEXT,
+  photo_url TEXT,
+  photo_share_url TEXT,
 
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
